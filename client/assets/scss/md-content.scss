@@ -1,0 +1,57 @@
+.md-content {
+  .todo-list {
+    margin-bottom: 1rem;
+    margin-left: 1rem;
+
+    .todo {
+      .todo-checkbox, .todo-content {
+        display: inline-block;
+        margin-bottom: 0;
+      }
+
+      .todo-checkbox {
+        margin-right: 1rem;
+      }
+
+      .todo-checkbox:checked~.todo-content {
+        text-decoration: line-through;
+      }
+    }
+  }
+
+  a {
+    text-decoration: underline;
+    color: #1976D2;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.375;
+    margin-top: 1em;
+    margin-bottom: .5em;
+    letter-spacing: -.025em;
+  }
+
+  h1:first-child {
+    margin-top: 0;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.375;
+    margin-top: 1.25em;
+    margin-bottom: .5em;
+    letter-spacing: -.025em;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.375;
+    margin-top: 1.25em;
+    margin-bottom: .5em;
+    letter-spacing: -.025em;
+  }
+}
