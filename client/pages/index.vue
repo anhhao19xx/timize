@@ -1,103 +1,52 @@
 <template>
-  <div>
-    <!-- TOP BAR -->
-    <div class="app-top-bar">
-      <input type="file" class="d-none" @change="importFromFile" id="import-from-file">
-      <label for="import-from-file" class="btn btn-none">
-        <i class="icon icon-cloud-upload"></i>
-      </label>
-      <b-button @click="exportToFile" variant="none">
-        <i class="icon icon-cloud-download"></i>
-      </b-button>
+  <div class="timeline">
+    <b-button variant="primary" class="add-piece" @click="addPiece"><big>+</big></b-button>
+
+    <div v-for="item in dataGroupByDate" :key="item.groupValue" class="piece-group">
+      <div class="date">{{ formatDate(item.groupValue) }}</div>
+
+      <div v-for="piece in item.list" :key="piece.id" class="piece">
+        <div class="time">{{ formatTime(piece.createdAt) }}</div>
+        <div class="top-bar">
+          <b-button @click="selectPiece(piece)" variant="outline-primary" size="sm">
+            <i class="icon icon-pencil"></i>
+          </b-button>
+          <b-button @click="removePiece(piece)" variant="outline-danger" size="sm">
+            <i class="icon icon-trash"></i>
+          </b-button>
+        </div>
+        <div class="content md-content" v-html="marked(piece.content)"></div>
+      </div>
     </div>
-    <!-- END TOP BAR -->
 
-    <b-container fluid>
-      <!-- MAIN -->
-      <b-row>
-        <!-- SIDEBAR -->
-        <b-col cols="3">
-          
-        </b-col>
-        <!-- END SIDEBAR -->
-
-        <!-- CONTENT -->
-        <b-col cols="9" class="app-content">
-          <b-button variant="primary" class="add-piece" @click="addPiece"><big>+</big></b-button>
-
-          <div v-for="item in dataGroupByDate" :key="item.groupValue" class="piece-group">
-            <div class="date">{{ formatDate(item.groupValue) }}</div>
-
-            <div v-for="piece in item.list" :key="piece.id" class="piece">
-              <div class="time">{{ formatTime(piece.createdAt) }}</div>
-              <div class="top-bar">
-                <b-button @click="selectPiece(piece)" variant="outline-primary" size="sm">
-                  <i class="icon icon-pencil"></i>
-                </b-button>
-                <b-button @click="removePiece(piece)" variant="outline-danger" size="sm">
-                  <i class="icon icon-trash"></i>
-                </b-button>
-              </div>
-              <div class="content md-content" v-html="marked(piece.content)"></div>
-            </div>
-          </div>
-
-          <b-modal id="current-piece" hide-header hide-footer size="xl" @hide="closeCurrentPieceModal">
-            <div v-if="currentPiece">
-              <editor v-model="currentPieceContent"></editor>
-            </div>
-          </b-modal>
-        </b-col>
-        <!-- END CONTENT -->
-      </b-row>
-      <!-- END MAIN -->
-
-    </b-container>
+    <b-modal id="current-piece" hide-header hide-footer size="xl" @hide="closeCurrentPieceModal">
+      <div v-if="currentPiece">
+        <TimizeEditor v-model="currentPieceContent"></TimizeEditor>
+      </div>
+    </b-modal>
   </div>
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex';
 import { nanoid } from 'nanoid';
 import moment from 'moment';
 import dateFormat from "dateformat";
-import editor from '../comps/editor.vue';
-
-function download(filename, text) {
-  var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-  element.setAttribute('download', filename);
-
-  element.style.display = 'none';
-  document.body.appendChild(element);
-
-  element.click();
-
-  document.body.removeChild(element);
-}
+import TimizeEditor from '../comps/TimizeEditor.vue';
 
 export default {
-  components: { editor },
+  components: { TimizeEditor },
+
   data(){
     return {
       currentPiece: null,
-      currentPieceContent: null,
-
-      state: 'saved',
-
-      data: []
+      currentPieceContent: null
     }
   },
 
-  mounted(){
-    const rawData = localStorage.getItem('timize-data');
-
-    if (rawData)
-      this.data = JSON.parse(rawData);
-    else
-      this.data = [];
-  },
-
   computed: {
+    ...mapState(['data']), 
+
     dataGroupByDate(){
       const dates = {};
       for (let piece of this.data){
@@ -123,36 +72,7 @@ export default {
   },
 
   methods: {
-    save(){
-      localStorage.setItem('timize-data', JSON.stringify(this.data));
-
-      this.$bvToast.toast(`Saved`, {
-        title: 'Timizer',
-        autoHideDelay: 3000,
-        variant: 'success',
-        appendToast: true,
-        toaster: 'b-toaster-bottom-right'
-      });
-    },
-
-    async importFromFile(event){
-      const file = event.target.files[0];
-
-      const rawData = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = function(){ resolve(reader.result) }
-        reader.readAsText(file);
-      });
-
-      this.data = JSON.parse(rawData);
-      this.save();
-
-      event.target.value = null;
-    },
-
-    exportToFile(){
-      download(`timize - ${moment().format('YYYYMMDD HHmmss')}.json`, JSON.stringify(this.data));
-    },
+    ...mapActions(['add', 'remove', 'update']),
 
     marked(str){
       return this.$md.parse(str);
@@ -169,14 +89,12 @@ export default {
     addPiece(){
       const createdAt = new Date();
 
-      this.data.unshift({
+      this.add({
         id: nanoid(),
         title: `Quick note at ${moment(createdAt).format('YYYY-MM-DD HH:mm:ss')}`,
         content: '',
         createdAt
       });
-
-      this.save();
     },
 
     selectPiece(piece){
@@ -190,77 +108,78 @@ export default {
       if (this.currentPieceContent === this.currentPiece.content)
         return;
 
-      this.currentPiece.content = this.currentPieceContent;
-
-      this.save();
+      this.update({ id: this.currentPiece.id, content: this.currentPieceContent });
+      this.currentPiece = null;
+      this.currentPieceContent = '';
     },
 
     removePiece(piece){
-      const pos = this.data.indexOf(piece);
-      this.data.splice(pos, 1);
-
-      this.save();
+      this.remove(piece.id);
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.add-piece {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  text-align: center;
-  line-height: 36px;
-  margin: 0 auto;
-  display: block;
-  margin-top: 1em;
+.timeline {
+  padding-left: 4em;
 
-  big {
-    font-size: 26px;
-  }
-}
+  .add-piece {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    text-align: center;
+    line-height: 36px;
+    margin: 0 auto;
+    display: block;
+    margin-top: 1em;
 
-.piece-group {
-  margin-top: 1em;
-  margin-bottom: 1em;
-  
-  padding-top: 1em;
-  padding-bottom: 1em;
-  
-
-  .date {
-    font-size: 1.5em;
-    font-weight: bold;
+    big {
+      font-size: 26px;
+    }
   }
 
-  .piece {
-    position: relative;
-    border: 1px solid #e0e0e0;
-    padding: .5em 2.8em .5em 1em;
-    margin: 1em 0;
-    min-height: 5em;
-    border-radius: .5em;
+  .piece-group {
+    margin-top: 1em;
+    margin-bottom: 1em;
     
-    .time {
-      position: absolute;
-      left: -6em;
-      width: 5em;
-      text-align: right;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    
+
+    .date {
+      font-size: 1.5em;
+      font-weight: bold;
     }
 
-    .top-bar {
-      position: absolute;
-      top: 0;
-      right: 0;
-
-      button {
-        display: block;
-        margin: .5em;
-        font-size: .8em;
+    .piece {
+      position: relative;
+      border: 1px solid #e0e0e0;
+      padding: .5em 2.8em .5em 1em;
+      margin: 1em 0;
+      min-height: 5em;
+      border-radius: .5em;
+      
+      .time {
+        position: absolute;
+        left: -4em;
+        width: 3em;
+        text-align: right;
       }
-    }
-  } 
 
+      .top-bar {
+        position: absolute;
+        top: 0;
+        right: 0;
+
+        button {
+          display: block;
+          margin: .5em;
+          font-size: .8em;
+        }
+      }
+    } 
+
+  }
 }
 </style>
