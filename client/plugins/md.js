@@ -243,8 +243,14 @@ marked.use({ tokenizer });
   // end extensions
 
   inject('md', {
+    marked, 
+    
     parse(str){
       return marked(str);
+    },
+
+    lexer(str){
+      return marked.lexer(str);
     }
   })
 }

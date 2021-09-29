@@ -5,7 +5,8 @@ module.exports = {
     mode: 'hash'
   },
   plugins: [
-    '~/plugins/md.js'
+    '~/plugins/md.js',
+    '~/plugins/db.js'
   ],
   modules: ['bootstrap-vue/nuxt'],
   bootstrapVue: {

@@ -28,24 +28,45 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState, mapActions, mapMutations } from 'vuex';
 import { nanoid } from 'nanoid';
 import moment from 'moment';
 import dateFormat from "dateformat";
 import TimizeEditor from '../comps/TimizeEditor.vue';
+
+const R_DATE = /^[0-9]{4}[0-1][0-9][0-3][0-9]$/;
+const R_TIMERANGE = /^\(([0-2]*[0-9]:[0-5]*[0-9])-([0-2]*[0-9]:[0-5]*[0-9])\)/;
+
+function extract(tokens, types){
+  let ls = [];
+  for (let token of tokens){
+    if (types.indexOf(token.type) !== -1 ){
+      ls.push(token);
+      continue;
+    }
+
+    if (token.tokens){
+      ls = ls.concat(extract(token.tokens, types));
+    }
+  }
+
+  return ls;
+}
 
 export default {
   components: { TimizeEditor },
 
   data(){
     return {
+      data: [],
+
       currentPiece: null,
       currentPieceContent: null
     }
   },
 
   computed: {
-    ...mapState(['data']), 
+    ...mapState(['dataVersion']), 
 
     dataGroupByDate(){
       const dates = {};
@@ -72,7 +93,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['add', 'remove', 'update']),
+    ...mapMutations(['updateTasks', 'pushNotice']),
 
     marked(str){
       return this.$md.parse(str);
@@ -86,15 +107,23 @@ export default {
       return moment(d).format('HH:mm')
     },
 
-    addPiece(){
+    async syncData(){
+      this.data = await this.$db.list('pieces', { $limit: -1, $sort: { createdAt: -1 } });
+    },
+
+    async addPiece(){
       const createdAt = new Date();
 
-      this.add({
-        id: nanoid(),
+      await this.$db.create('pieces', {
         title: `Quick note at ${moment(createdAt).format('YYYY-MM-DD HH:mm:ss')}`,
         content: '',
-        createdAt
+        createdAt: createdAt.toString(),
+        updatedAt: createdAt.toString()
       });
+
+      this.pushNotice({ text: 'Created', type: 'success' });
+
+      await this.syncData();
     },
 
     selectPiece(piece){
@@ -104,17 +133,85 @@ export default {
       this.$bvModal.show('current-piece');
     },
 
-    closeCurrentPieceModal(){
+    async closeCurrentPieceModal(){
       if (this.currentPieceContent === this.currentPiece.content)
         return;
 
-      this.update({ id: this.currentPiece.id, content: this.currentPieceContent });
+      const tokens = this.$md.lexer(this.currentPieceContent);
+      let currentDate = null;
+
+      const hashesAndTaskItems = extract(tokens, ['hash', 'taskitem'])
+
+      const tasks = [];
+
+      let index = 0;
+      for (let token of hashesAndTaskItems){
+        if (token.type === 'hash' && R_DATE.test(token.text))
+          currentDate = token.text;
+
+        if (token.type === 'taskitem'){
+          let todo = this.$md.marked.Parser.parseInline(token.tokens);
+          let rel = R_TIMERANGE.exec(todo);
+          let startAt, endAt;
+
+          if (rel){
+            startAt = rel[1];
+            endAt = rel[2];
+            todo = todo.replace(rel[0], '').trim();
+          }
+
+          let task = {
+            piece: this.currentPiece.id,
+            todo,
+            done: token.checked,
+            index: index++,
+            createdAt: this.currentPiece.createdAt.toString()
+          }
+
+          if (currentDate){
+            if (startAt){
+              task.startAt = moment(`${currentDate} ${startAt}:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
+            } else {
+              task.startAt = moment(`${currentDate} 00:00:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
+            }
+
+            if (endAt){
+              task.endAt = moment(`${currentDate} ${endAt}:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
+            }
+          }
+
+          tasks.push(task);
+        } 
+      }
+
+      await this.$db.removeWhere('tasks', { piece: this.currentPiece.id });
+      if (tasks.length)
+        await this.$db.createMany('tasks', tasks);
+
+      await this.$db.update('pieces', this.currentPiece.id, { content: this.currentPieceContent });
+      this.pushNotice({ text: 'Updated', type: 'success' });
+
+      await this.syncData();
+
       this.currentPiece = null;
       this.currentPieceContent = '';
     },
 
-    removePiece(piece){
-      this.remove(piece.id);
+    async removePiece(piece){
+      await this.$db.remove('pieces', piece.id);
+      this.pushNotice({ text: 'Removed', type: 'success' });
+
+      await this.syncData();
+    }
+  },
+
+  async mounted(){
+    await this.syncData();
+  },
+
+  watch: {
+    async dataVersion(){
+      await this.syncData();
     }
   }
 }

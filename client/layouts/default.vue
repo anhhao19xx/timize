@@ -65,32 +65,31 @@ export default {
   },
 
   methods: {
-    ...mapMutations(['loadData']),
-    ...mapActions(['save']),
+    ...mapMutations(['incDataVer']),
 
     async importFromFile(event){
       const file = event.target.files[0];
 
-      const rawData = await new Promise((resolve) => {
+      const jsonString = await new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = function(){ resolve(reader.result) }
         reader.readAsText(file);
       });
 
-      const data = JSON.parse(rawData);
-      this.save(data);
-
+      await this.$db.importDB(jsonString);
       event.target.value = null;
+
+      this.incDataVer();
+
+      this.$store.commit('pushNotice', { text: 'Imported', type: 'success' });
     },
 
-    exportToFile(){
-      download(`timize - ${moment().format('YYYYMMDD HHmmss')}.json`, JSON.stringify(this.data));
+    async exportToFile(){
+      download(`timize - ${moment().format('YYYYMMDD HHmmss')}.json`, await this.$db.exportDB());
+      
+      this.$store.commit('pushNotice', { text: 'Exported', type: 'success' });
     }
-  },
-
-  mounted(){
-    this.loadData();
-  },
+  }
 }
 </script>
 
