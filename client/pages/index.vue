@@ -198,6 +198,7 @@ export default {
     },
 
     async removePiece(piece){
+      await this.$db.removeWhere('tasks', { piece: piece.id });
       await this.$db.remove('pieces', piece.id);
       this.pushNotice({ text: 'Removed', type: 'success' });
 
