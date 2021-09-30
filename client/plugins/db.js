@@ -72,7 +72,13 @@ export default ({ app }, inject) => {
       let queryBuilder = db[storeName];
 
       if (Object.keys(doc).length > 0){
-        queryBuilder = queryBuilder.where(doc);
+        queryBuilder = queryBuilder.filter(originDoc => {
+          for (let key in doc)
+            if (originDoc[key] !== doc[key])
+              return false;
+
+          return true;
+        });
       }
 
       if (controls.$sort){

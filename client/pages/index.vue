@@ -3,7 +3,7 @@
     <b-button variant="primary" class="add-piece" @click="addPiece"><big>+</big></b-button>
 
     <div v-for="item in dataGroupByDate" :key="item.groupValue" class="piece-group">
-      <div class="date">{{ formatDate(item.groupValue) }}</div>
+      <DateFormat :date="item.groupValue"></DateFormat>
 
       <div v-for="piece in item.list" :key="piece.id" class="piece">
         <div class="time">{{ formatTime(piece.createdAt) }}</div>
@@ -29,10 +29,10 @@
 
 <script>
 import { mapState, mapActions, mapMutations } from 'vuex';
-import { nanoid } from 'nanoid';
 import moment from 'moment';
 import dateFormat from "dateformat";
 import TimizeEditor from '../comps/TimizeEditor.vue';
+import DateFormat from '../comps/DateFormat.vue';
 
 const R_DATE = /^[0-9]{4}[0-1][0-9][0-3][0-9]$/;
 const R_TIMERANGE = /^\(([0-2]*[0-9]:[0-5]*[0-9])-([0-2]*[0-9]:[0-5]*[0-9])\)/;
@@ -54,7 +54,7 @@ function extract(tokens, types){
 }
 
 export default {
-  components: { TimizeEditor },
+  components: { TimizeEditor, DateFormat },
 
   data(){
     return {
@@ -97,10 +97,6 @@ export default {
 
     marked(str){
       return this.$md.parse(str);
-    },
-
-    formatDate(d){
-      return dateFormat(d, 'DDDD');
     },
 
     formatTime(d){
@@ -244,11 +240,6 @@ export default {
     padding-top: 1em;
     padding-bottom: 1em;
     
-
-    .date {
-      font-size: 1.5em;
-      font-weight: bold;
-    }
 
     .piece {
       position: relative;

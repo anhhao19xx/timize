@@ -1,2 +1,6 @@
 @import 'theme.scss';
 @import 'md-content.scss';
+
+body {
+  overflow-y: scroll;
+}

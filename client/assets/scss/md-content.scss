@@ -68,4 +68,8 @@
     margin-bottom: .5em;
     letter-spacing: -.025em;
   }
+
+  table.table th[align="right"] {
+    text-align: right;
+  }
 }
