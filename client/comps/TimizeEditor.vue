@@ -71,6 +71,7 @@ export default {
 <style lang="scss" scoped>
 .tm-editor {
   display: flex;
+  height: 100%;
 
   .content-editor, 
   .content-preview {
@@ -80,10 +81,11 @@ export default {
   }
 
   .content-editor {
-    overflow-y: hidden !important;  
+    overflow-y: scroll;  
     font-family: inherit;
     border: none;
     border-radius: 0;
+    height: 100% !important;
   }
 
   .content-editor:focus {
@@ -94,6 +96,7 @@ export default {
 
   .content-preview {
     border-left: 1px solid #e0e0e0;
+    overflow-y: scroll;
   }
 }
 </style>

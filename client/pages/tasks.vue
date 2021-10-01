@@ -45,8 +45,6 @@ export default {
 
         let startAtDate = moment(task.startAt).format('YYYY-MM-DD');
 
-        console.log(startAtDate, task.todo);
-
         if (!dates[startAtDate])
           dates[startAtDate] = [];
 
@@ -133,6 +131,11 @@ export default {
 
       input {
         margin: 0 1em;
+        display: inline;
+      }
+
+      label {
+        display: inline;
       }
     }
   }

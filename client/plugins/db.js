@@ -66,6 +66,10 @@ export default ({ app }, inject) => {
       });
     },
 
+    async get(storeName, id){
+      return await db[storeName].get(id);
+    },
+
     async list(storeName, query = {}){
       const { doc, controls } = extractControls(query, ['$limit', '$skip', '$sort'])
 

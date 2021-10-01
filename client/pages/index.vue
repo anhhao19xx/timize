@@ -19,11 +19,7 @@
       </div>
     </div>
 
-    <b-modal id="current-piece" hide-header hide-footer size="xl" @hide="closeCurrentPieceModal">
-      <div v-if="currentPiece">
-        <TimizeEditor v-model="currentPieceContent"></TimizeEditor>
-      </div>
-    </b-modal>
+    <Piece v-model="currentPiece"/>
   </div>
 </template>
 
@@ -33,28 +29,10 @@ import moment from 'moment';
 import dateFormat from "dateformat";
 import TimizeEditor from '../comps/TimizeEditor.vue';
 import DateFormat from '../comps/DateFormat.vue';
-
-const R_DATE = /^[0-9]{4}[0-1][0-9][0-3][0-9]$/;
-const R_TIMERANGE = /^\(([0-2]*[0-9]:[0-5]*[0-9])-([0-2]*[0-9]:[0-5]*[0-9])\)/;
-
-function extract(tokens, types){
-  let ls = [];
-  for (let token of tokens){
-    if (types.indexOf(token.type) !== -1 ){
-      ls.push(token);
-      continue;
-    }
-
-    if (token.tokens){
-      ls = ls.concat(extract(token.tokens, types));
-    }
-  }
-
-  return ls;
-}
+import Piece from '../comps/Piece.vue';
 
 export default {
-  components: { TimizeEditor, DateFormat },
+  components: { TimizeEditor, DateFormat, Piece },
 
   data(){
     return {
@@ -123,74 +101,7 @@ export default {
     },
 
     selectPiece(piece){
-      this.currentPiece = piece;
-      this.currentPieceContent = this.currentPiece.content;
-
-      this.$bvModal.show('current-piece');
-    },
-
-    async closeCurrentPieceModal(){
-      if (this.currentPieceContent === this.currentPiece.content)
-        return;
-
-      const tokens = this.$md.lexer(this.currentPieceContent);
-      let currentDate = null;
-
-      const hashesAndTaskItems = extract(tokens, ['hash', 'taskitem'])
-
-      const tasks = [];
-
-      let index = 0;
-      for (let token of hashesAndTaskItems){
-        if (token.type === 'hash' && R_DATE.test(token.text))
-          currentDate = token.text;
-
-        if (token.type === 'taskitem'){
-          let todo = this.$md.marked.Parser.parseInline(token.tokens);
-          let rel = R_TIMERANGE.exec(todo);
-          let startAt, endAt;
-
-          if (rel){
-            startAt = rel[1];
-            endAt = rel[2];
-            todo = todo.replace(rel[0], '').trim();
-          }
-
-          let task = {
-            piece: this.currentPiece.id,
-            todo,
-            done: token.checked,
-            index: index++,
-            createdAt: this.currentPiece.createdAt.toString()
-          }
-
-          if (currentDate){
-            if (startAt){
-              task.startAt = moment(`${currentDate} ${startAt}:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
-            } else {
-              task.startAt = moment(`${currentDate} 00:00:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
-            }
-
-            if (endAt){
-              task.endAt = moment(`${currentDate} ${endAt}:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
-            }
-          }
-
-          tasks.push(task);
-        } 
-      }
-
-      await this.$db.removeWhere('tasks', { piece: this.currentPiece.id });
-      if (tasks.length)
-        await this.$db.createMany('tasks', tasks);
-
-      await this.$db.update('pieces', this.currentPiece.id, { content: this.currentPieceContent });
-      this.pushNotice({ text: 'Updated', type: 'success' });
-
-      await this.syncData();
-
-      this.currentPiece = null;
-      this.currentPieceContent = '';
+      this.currentPiece = piece.id;
     },
 
     async removePiece(piece){
@@ -209,6 +120,11 @@ export default {
   watch: {
     async dataVersion(){
       await this.syncData();
+    },
+
+    async currentPiece(){
+      if (this.currentPiece === null)
+        await this.syncData();
     }
   }
 }
