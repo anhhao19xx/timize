@@ -201,6 +201,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
+  z-index: 10;
 
   label.bg {
     background-color: rgba(0, 0, 0, .5);

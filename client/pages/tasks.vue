@@ -1,5 +1,7 @@
 <template>
   <div class="tasks">
+    <Piece v-model="currentPiece"/>
+    
     <div v-for="item in taskGroupByStartAt" :key="item.groupValue" class="task-group">
       <DateFormat :date="item.groupValue" v-if="item.groupBy === 'startAt'"></DateFormat>
       <div class="group-title" v-if="!item.groupBy">{{ item.groupValue }}</div>
@@ -10,7 +12,7 @@
           <div class="endAt">{{ formatTime(task.endAt) }}</div>
         </div>
         <input type="checkbox" onclick="return false;"/>
-        <label class="todo" v-html="task.todo"></label>
+        <label class="todo" v-html="task.todo" @click="selectPiece(task.piece)"></label>
       </div>
     </div>
   </div>
@@ -20,13 +22,16 @@
 import moment from 'moment';
 import { mapState } from 'vuex';
 import DateFormat from '../comps/DateFormat';
+import Piece from '../comps/Piece.vue';
 
 export default {
-  components: { DateFormat },
+  components: { DateFormat, Piece },
 
   data(){
     return {
-      data: []
+      data: [],
+
+      currentPiece: null
     }
   },
 
@@ -78,6 +83,10 @@ export default {
     formatTime(d){
       return moment(d).format('HH:mm')
     },
+
+    selectPiece(id){
+      this.currentPiece = id;
+    },
   },
 
   async mounted(){
@@ -87,6 +96,11 @@ export default {
   watch: {
     async dataVersion(){
       await this.syncData();
+    },
+
+    async currentPiece(){
+      if (this.currentPiece === null)
+        await this.syncData();
     }
   }
 }
