@@ -22,6 +22,7 @@
           <b-list-group>
             <b-list-group-item to="/">Timeline</b-list-group-item>
             <b-list-group-item to="/tasks">Tasks</b-list-group-item>
+            <b-list-group-item to="/calendar">Calendar</b-list-group-item>
           </b-list-group>
         </b-col>
         <!-- END SIDEBAR -->

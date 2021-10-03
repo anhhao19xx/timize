@@ -1,0 +1,193 @@
+<template>
+  <div class="calendar">
+    <div class="column time-column">
+      <div class="cell date-cell"></div>
+      <div class="cell" v-for="hour in hours" :key="`root-${hour}`">
+        <div class="hour-label">{{ `${hour}:00` }}</div>
+      </div>
+    </div>
+    <div v-for="day in getWeek()" :key="day.toString()" class="column">
+      <div class="cell date-cell">
+        <div class="dow">{{ getDayOfWeek(day) }} </div>
+        <div class="date">{{ formatDate(day) }}</div>
+      </div>
+      <div class="wrapper">
+        <div class="cell" v-for="hour in hours" :key="`${day}-${hour}`"></div>
+        <div class="event" v-for="event in getEventFromTask(day)" :key="event.task.id" :style="event.style">
+          <div class="content" :style="event.contentStyle">{{ event.task.todo }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import moment from 'moment';
+import { mapState } from 'vuex';
+
+export default {
+  data(){
+    return {
+      data: []
+    }
+  },
+  
+  computed: {
+    ...mapState(['dataVersion']),
+
+    hours(){
+      const ls = [];
+      for (let i = 0; i < 24; i++)
+        ls.push(i);
+      return ls;
+    }
+  },
+
+  methods: {
+    getWeek(d = new Date()){
+      const cursor = moment(d);
+      const week = [];
+      for (let i = 0; i < 7; i++){
+        week.push(cursor.day(i).toDate());
+      }
+      return week;
+    },
+
+    getDayOfWeek(d){
+      return moment(d).format('dddd');
+    },
+
+    formatDate(d){
+      return moment(d).format('DD/MM')
+    },
+
+    async syncData(){
+      this.data = await this.$db.list('tasks', { $limit: -1 });
+    },
+
+    getEventFromTask(d){
+      const currentDate = moment(d);
+
+      const ls = [];
+      for (let task of this.data){
+        if (!task.startAt || !task.endAt)
+          continue;
+
+        let taskStartAt = moment(task.startAt);
+        let taskEndAt = moment(task.endAt);
+
+        if (!taskStartAt.isSame(currentDate, 'day'))
+          continue;
+
+        let startAtHour = taskStartAt.hour() + Math.floor(taskStartAt.minute()/15)/4;
+        let endAtHour = taskEndAt.hour() + Math.floor(taskEndAt.minute()/15)/4;
+          
+        ls.push({
+          task,
+          style: {
+            top: `${startAtHour/24*100}%`,
+            height: `${(endAtHour - startAtHour)/24*100}%`,
+            width: `100%`
+          },
+          contentStyle: {
+            'background-color': task.done ? '#949494' : '#424242'
+          }
+        });
+      }
+
+      return ls;
+    }
+  },
+
+  async mounted(){
+    await this.syncData();
+  },
+
+  watch: {
+    async dataVersion(){
+      await this.syncData();
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+$border: 1px solid #e0e0e0;
+$cell-height: 80px;
+$date-cell-height: 60px;
+
+.calendar {
+  margin: 1em 0;
+
+  border-left: $border;
+  display: flex;
+
+  .column {
+    position: relative;
+    width: calc(14% - 7px);
+    
+    .cell {
+      height: $cell-height;
+      border-right: $border;
+      border-bottom: $border;      
+      position: relative;
+
+      &.date-cell {
+        border-top: $border;
+        text-align: center;
+        height: $date-cell-height;
+        padding: .5em;
+        overflow: hidden;
+
+        .dow {
+          font-weight: bold;
+        }
+
+        .date {
+          font-size: .8em;
+        }
+      }
+    }
+
+    &.time-column {
+      width: 50px;
+
+      .cell {
+        border-top: $border;
+
+        .hour-label {
+          text-align: center;
+          position: absolute;
+          top: -25px;
+          line-height: 50px;
+          height: 50px;
+          width: 100%;
+          background-color: white;
+          font-size: .8em;
+        }
+      }
+    }
+
+    .wrapper {
+      position: relative;
+      overflow: hidden;
+
+      .event {
+        position: absolute;
+        font-size: .9em;
+        padding-right: .2em;
+        padding-bottom: .2em;
+        overflow: hidden;
+        
+        .content {
+          color: white;
+          width: 100%;
+          height: 100%;
+          padding: .3em .5em;
+          border-radius: .3em;
+        }
+      }
+    }
+  }
+}
+</style>
