@@ -1,11 +1,14 @@
 <template>
   <div class="calendar">
+    <Piece v-model="currentPiece"/>
+
     <div class="column time-column">
       <div class="cell date-cell"></div>
       <div class="cell" v-for="hour in hours" :key="`root-${hour}`">
         <div class="hour-label">{{ `${hour}:00` }}</div>
       </div>
     </div>
+    
     <div v-for="day in getWeek()" :key="day.toString()" class="column">
       <div class="cell date-cell">
         <div class="dow">{{ getDayOfWeek(day) }} </div>
@@ -13,7 +16,7 @@
       </div>
       <div class="wrapper">
         <div class="cell" v-for="hour in hours" :key="`${day}-${hour}`"></div>
-        <div class="event" v-for="event in getEventFromTask(day)" :key="event.task.id" :style="event.style">
+        <div class="event" v-for="event in getEventFromTask(day)" :key="event.task.id" :style="event.style" @click="selectPiece(event.task.piece)">
           <div class="content" :style="event.contentStyle">{{ event.task.todo }}</div>
         </div>
       </div>
@@ -24,11 +27,15 @@
 <script>
 import moment from 'moment';
 import { mapState } from 'vuex';
+import Piece from '../comps/Piece.vue';
 
 export default {
+  components: { Piece },
+
   data(){
     return {
-      data: []
+      data: [],
+      currentPiece: null,
     }
   },
   
@@ -96,7 +103,11 @@ export default {
       }
 
       return ls;
-    }
+    },
+
+    selectPiece(id){
+      this.currentPiece = id;
+    },
   },
 
   async mounted(){
@@ -106,6 +117,11 @@ export default {
   watch: {
     async dataVersion(){
       await this.syncData();
+    },
+    
+    async currentPiece(){
+      if (this.currentPiece === null)
+        await this.syncData();
     }
   }
 }
@@ -113,7 +129,7 @@ export default {
 
 <style lang="scss" scoped>
 $border: 1px solid #e0e0e0;
-$cell-height: 80px;
+$cell-height: 50px;
 $date-cell-height: 60px;
 
 .calendar {
@@ -163,7 +179,7 @@ $date-cell-height: 60px;
           height: 50px;
           width: 100%;
           background-color: white;
-          font-size: .8em;
+          font-size: .6em;
         }
       }
     }
@@ -174,17 +190,17 @@ $date-cell-height: 60px;
 
       .event {
         position: absolute;
-        font-size: .9em;
-        padding-right: .2em;
-        padding-bottom: .2em;
+        font-size: .8em;
+        border-right: 1px solid white;
+        border-bottom: 1px solid white;
         overflow: hidden;
         
         .content {
           color: white;
           width: 100%;
           height: 100%;
-          padding: .3em .5em;
-          border-radius: .3em;
+          padding: .2em .4em;
+          border-radius: 4px;
         }
       }
     }
