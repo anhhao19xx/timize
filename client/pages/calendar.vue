@@ -128,19 +128,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$border: 1px solid #e0e0e0;
+$border: 1px solid #EAEAEA;
 $cell-height: 50px;
 $date-cell-height: 60px;
 
 .calendar {
-  margin: 1em 0;
-
+  margin: 1em 0 1em 1em;
   border-left: $border;
   display: flex;
 
   .column {
     position: relative;
-    width: calc(14% - 7px);
+    width: calc(14.285% - 7.1429px);
     
     .cell {
       height: $cell-height;

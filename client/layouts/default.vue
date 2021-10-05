@@ -14,26 +14,35 @@
     </div>
     <!-- END TOP BAR -->
 
-    <b-container fluid>
-      <!-- MAIN -->
-      <b-row>
-        <!-- SIDEBAR -->
-        <b-col cols="3" class="app-sidebar">
-          <b-list-group>
-            <b-list-group-item to="/">Timeline</b-list-group-item>
-            <b-list-group-item to="/tasks">Tasks</b-list-group-item>
-            <b-list-group-item to="/calendar">Calendar</b-list-group-item>
-          </b-list-group>
-        </b-col>
-        <!-- END SIDEBAR -->
+    <b-container class="app-container" fluid>
+      <!-- SIDEBAR -->
+      <div class="app-sidebar">
+        <nuxt-link to="/" class="item">
+          <i class="icon icon-clock"></i>
+          <span class="text">Timeline</span>
+        </nuxt-link>
+        <nuxt-link to="/tasks" class="item">
+          <i class="icon icon-list"></i>
+          <span class="text">Tasks</span>
+        </nuxt-link>
+        <nuxt-link to="/calendar" class="item">
+          <i class="icon icon-calendar"></i>
+          <span class="text">Calendar</span>
+        </nuxt-link>
+      </div>
+      <!-- END SIDEBAR -->
 
-        <!-- CONTENT -->
-        <b-col cols="9" class="app-content">
-          <Nuxt />
-        </b-col>
-        <!-- END CONTENT -->
-      </b-row>
-      <!-- END MAIN -->
+      <!-- CONTENT -->
+      <div class="app-content">
+        <Nuxt />
+      </div>
+      <!-- END CONTENT -->
+
+      <!-- TOOL BOX -->
+      <!-- <div class="tool-box">
+        This is a tool-box
+      </div> -->
+      <!-- END TOOL BOX -->
 
     </b-container>
   </div>
@@ -95,14 +104,23 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+$top-bar-height: 50px;
+$border-color: #EAEAEA;
+$sidebar-width: 150px;
+$tool-box-width: 250px;
+
 .app-top-bar {
+  position: fixed;
+  z-index: 10;
+  width: 100%;
+
   display: flex;
   align-items: center;
   padding: 0 12px;
-  height: 50px;
-  min-height: 50px;
+  height: $top-bar-height;
+  min-height: $top-bar-height;
   background: #FFF;
-  border-bottom: 1px solid #EFF1F4;
+  border-bottom: 1px solid $border-color;
   margin-bottom: -1px;
 
   .btn {
@@ -137,6 +155,47 @@ export default {
 }
 
 .app-sidebar {
-  margin-top: 1em;
+  position: fixed;
+  top: $top-bar-height;
+  left: 0;
+  width: $sidebar-width;
+  height: 100%;
+  background-color: white;
+  border-right: 1px solid $border-color;
+  z-index: 10;
+
+  .item {
+    display: block;
+    height: 40px;
+    line-height: 40px;
+    padding: 0 .5em;
+
+    .icon {
+      margin-left: .5em;
+      margin-right: 1em;
+    }
+
+    &:hover {
+      text-decoration: none;
+      background-color: #f0f0f0;
+    }
+  }
 }
+
+.tool-box {
+  position: fixed;
+  top: $top-bar-height;
+  right: 0;
+  width: $tool-box-width;
+  height: 100%;
+  background-color: white;
+  border-left: 1px solid $border-color;
+  z-index: 10;
+}
+
+.app-container {
+  padding-top: $top-bar-height;
+  padding-left: $sidebar-width;
+}
+
 </style>

@@ -170,6 +170,7 @@ export default {
         left: -4em;
         width: 3em;
         text-align: right;
+        font-size: .9em;
       }
 
       .top-bar {
