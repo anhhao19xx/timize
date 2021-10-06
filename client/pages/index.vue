@@ -132,7 +132,7 @@ export default {
 
 <style lang="scss" scoped>
 .timeline {
-  padding-left: 4em;
+  padding-left: 6em;
 
   .add-piece {
     width: 40px;

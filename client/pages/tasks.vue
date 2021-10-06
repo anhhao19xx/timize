@@ -108,7 +108,7 @@ export default {
 
 <style lang="scss" scoped>
 .tasks {
-  padding-left: 4em;
+  padding-left: 6em;
 
   .group-title {
     font-size: 1.5em;
