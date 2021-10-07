@@ -29,6 +29,23 @@ import moment from 'moment';
 import { mapState } from 'vuex';
 import Piece from '../comps/Piece.vue';
 
+const COLORS = {
+  red: '#D32F2F',
+  green: '#388E3C',
+  blue: '#1976D2',
+  pink: '#C2185B',
+  purple: '#7B1FA2',
+  indigo: '#303F9F',
+  cyan: '#0097A7',
+  teal: '#00796B',
+  lime: '#AFB42B',
+  yellow: '#FBC02D',
+  amber: '#FFA000',
+  orange: '#F57C00',
+  brown: '#5D4037',
+  grey: '#616161'
+}
+
 export default {
   components: { Piece },
 
@@ -72,6 +89,13 @@ export default {
       this.data = await this.$db.list('tasks', { $limit: -1 });
     },
 
+    mapColor(color){
+      if (COLORS[color])
+        return COLORS[color];
+
+      return color;
+    },
+
     getEventFromTask(d){
       const currentDate = moment(d);
 
@@ -97,7 +121,8 @@ export default {
             width: `100%`
           },
           contentStyle: {
-            'background-color': task.done ? '#949494' : '#424242'
+            'background-color': this.mapColor(task.color) || COLORS['grey'],
+            opacity: task.done ? 0.5 : 1
           }
         });
       }

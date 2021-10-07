@@ -24,9 +24,9 @@ export default ({ app }, inject) => {
   const { store } = app;
 
   const db = new Dexie("TimizeDB");
-  db.version(3).stores({
+  db.version(4).stores({
     pieces: '++id,title,content,createdAt,updatedAt',
-    tasks: '++id,todo,startAt,endAt,createdAt,piece,index,done'
+    tasks: '++id,todo,startAt,endAt,createdAt,piece,index,done,color'
   });
 
   inject('db', {

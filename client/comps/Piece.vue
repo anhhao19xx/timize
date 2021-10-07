@@ -21,7 +21,9 @@ import moment from 'moment';
 
 const UPDATE_DURATION = 5000;
 const R_DATE = /^[0-9]{4}[0-1][0-9][0-3][0-9]$/;
-const R_TIMERANGE = /^\(([0-2]*[0-9]:[0-5]*[0-9])-([0-2]*[0-9]:[0-5]*[0-9])\)/;
+const R_TIMERANGE = /^([0-2]*[0-9]:[0-5]*[0-9])-([0-2]*[0-9]:[0-5]*[0-9])/;
+const R_META = /^\((.*?)\)/;
+const R_COLOR = /^(red|green|blue|pink|purple|indigo|cyan|teal|lime|yellow|amber|orange|brown|grey)/;
 
 function extract(tokens, types){
   let ls = [];
@@ -100,12 +102,30 @@ export default {
 
         if (token.type === 'taskitem'){
           let todo = this.$md.marked.Parser.parseInline(token.tokens);
-          let rel = R_TIMERANGE.exec(todo);
-          let startAt, endAt;
+
+          let rel = R_META.exec(todo);
+          let startAt, endAt, color;
 
           if (rel){
-            startAt = rel[1];
-            endAt = rel[2];
+            let metaList = rel[1].split('|').filter(i => i);
+
+            
+
+            for (let meta of metaList){
+              // time range meta
+              let metaRel = R_TIMERANGE.exec(meta);
+              if (metaRel){
+                startAt = metaRel[1];
+                endAt = metaRel[2];
+              }
+
+              // color
+              metaRel = R_COLOR.exec(meta);
+              if (metaRel){
+                color = metaRel[1];
+              }
+            }
+
             todo = todo.replace(rel[0], '').trim();
           }
 
@@ -127,6 +147,10 @@ export default {
             if (endAt){
               task.endAt = moment(`${currentDate} ${endAt}:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
             }
+          }
+
+          if (color){
+            task.color = color;
           }
 
           tasks.push(task);
