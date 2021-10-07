@@ -2,6 +2,8 @@ import marked from "marked";
 import { nanoid } from "nanoid";
 import { HyperFormula } from "hyperformula";
 
+const R_META = /^\((.*?)\)/;
+
 export default ({ app }, inject) => {
   // tokenizer
   const tokenizer = {
@@ -233,9 +235,9 @@ export default ({ app }, inject) => {
   const taskList = {
     name: 'tasklist',
     level: 'block',
-    start(src){ return src.match(/^[*+-]/)?.index },
+    start(src){ return src.match(/^[+-]/)?.index },
     tokenizer(src){
-      const rule = /^(?:[*+-] \[[ xX]\][^\n]*(?:\n|$))+/;
+      const rule = /^(?:[+-] \[[ xX]\][^\n]*(?:\n|$))+/;
       const match = rule.exec(src);
       if (!match)
         return;
@@ -258,18 +260,24 @@ export default ({ app }, inject) => {
   const taskItem = {
     name: 'taskitem',
     level: 'inline',
-    start(src) { return src.match(/^[*+-]/)?.index; },
+    start(src) { return src.match(/^[+-]/)?.index; },
     tokenizer(src) {
-      const rule = /^[*+-] \[([ xX])\]([^\n]*)(?:\n|$)/;
+      const rule = /^[+-] \[([ xX])\]([^\n]*)(?:\n|$)/;
       const match = rule.exec(src);
       if (!match)
         return;
+
+      let innerText = match[2].trim();
+
+      const rel = R_META.exec(innerText);
+      if (rel)
+        innerText = innerText.replace(rel[0], '');
         
       return {
         type: 'taskitem',
         raw: match[0],
         checked: match[1] !== ' ',
-        tokens: this.lexer.inlineTokens(match[2].trim())
+        tokens: this.lexer.inlineTokens(innerText.trim())
       };
     },
     renderer(token) {
