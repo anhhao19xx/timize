@@ -15,7 +15,7 @@
             <i class="icon icon-trash"></i>
           </b-button>
         </div>
-        <div class="content md-content" v-html="marked(piece.content)"></div>
+        <MdViewer class="content" :value="piece.content" @change="updatePieceContent(piece, $event)"></MdViewer>
       </div>
     </div>
 
@@ -30,9 +30,10 @@ import dateFormat from "dateformat";
 import TimizeEditor from '../comps/TimizeEditor.vue';
 import DateFormat from '../comps/DateFormat.vue';
 import Piece from '../comps/Piece.vue';
+import MdViewer from '../comps/MdViewer.vue';
 
 export default {
-  components: { TimizeEditor, DateFormat, Piece },
+  components: { TimizeEditor, DateFormat, Piece, MdViewer },
 
   data(){
     return {
@@ -73,10 +74,6 @@ export default {
   methods: {
     ...mapMutations(['updateTasks', 'pushNotice']),
 
-    marked(str){
-      return this.$md.parse(str);
-    },
-
     formatTime(d){
       return moment(d).format('HH:mm')
     },
@@ -110,6 +107,13 @@ export default {
       this.pushNotice({ text: 'Removed', type: 'success' });
 
       await this.syncData();
+    },
+
+    async updatePieceContent(piece, content){
+      await this.$utils.updatePieceContent(piece, content);
+      await this.syncData();
+
+      this.pushNotice({ text: 'Updated', type: 'success' });
     }
   },
 

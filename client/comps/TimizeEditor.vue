@@ -4,16 +4,20 @@
       class="content-editor"
       ref="textarea"
       max-rows="9999"
-      v-model="content"
+      :value="content"
       @input="onInput"
     ></b-form-textarea>
-    <div class="content-preview md-content" v-html="previewData"></div>
+
+    <MdViewer :value="previewData" class="content-preview" @change="onInput"></MdViewer>
   </div>
 </template>
 
 <script>
+import MdViewer from './MdViewer.vue';
+
 export default {
   props: ['value'],
+  components: { MdViewer },
 
   data(){
     return {
@@ -30,7 +34,7 @@ export default {
         if (!this.isChanged)
           return;
 
-        this.previewData = this.$md.parse(this.content);
+        this.previewData = this.content;
         this.isChanged = false;
       }, 500)
     },

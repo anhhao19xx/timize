@@ -17,29 +17,9 @@
 <script>
 import { mapState, mapActions, mapMutations } from 'vuex';
 import TimizeEditor from './TimizeEditor.vue';
-import moment from 'moment';
 
 const UPDATE_DURATION = 5000;
-const R_DATE = /^[0-9]{4}[0-1][0-9][0-3][0-9]$/;
-const R_TIMERANGE = /^([0-2]*[0-9]:[0-5]*[0-9])-([0-2]*[0-9]:[0-5]*[0-9])/;
-const R_META = /^\((.*?)\)/;
-const R_COLOR = /^(red|green|blue|pink|purple|indigo|cyan|teal|lime|yellow|amber|orange|brown|grey)/;
 
-function extract(tokens, types){
-  let ls = [];
-  for (let token of tokens){
-    if (types.indexOf(token.type) !== -1 ){
-      ls.push(token);
-      continue;
-    }
-
-    if (token.tokens){
-      ls = ls.concat(extract(token.tokens, types));
-    }
-  }
-
-  return ls;
-}
 
 export default {
   props: ['value'],
@@ -88,82 +68,7 @@ export default {
       if (this.content === this.data.content)
         return false;
 
-      const tokens = this.$md.lexer(this.content);
-      let currentDate = null;
-
-      const hashesAndTaskItems = extract(tokens, ['hash', 'taskitem'])
-
-      const tasks = [];
-
-      let index = 0;
-      for (let token of hashesAndTaskItems){
-        if (token.type === 'hash' && R_DATE.test(token.text))
-          currentDate = token.text;
-
-        if (token.type === 'taskitem'){
-          let todo = this.$md.marked.Parser.parseInline(token.tokens);
-
-          let rel = R_META.exec(todo);
-          let startAt, endAt, color;
-
-          if (rel){
-            let metaList = rel[1].split('|').filter(i => i);
-
-            
-
-            for (let meta of metaList){
-              // time range meta
-              let metaRel = R_TIMERANGE.exec(meta);
-              if (metaRel){
-                startAt = metaRel[1];
-                endAt = metaRel[2];
-              }
-
-              // color
-              metaRel = R_COLOR.exec(meta);
-              if (metaRel){
-                color = metaRel[1];
-              }
-            }
-
-            todo = todo.replace(rel[0], '').trim();
-          }
-
-          let task = {
-            piece: this.value,
-            todo,
-            done: token.checked,
-            index: index++,
-            createdAt: this.data.createdAt.toString()
-          }
-
-          if (currentDate){
-            if (startAt){
-              task.startAt = moment(`${currentDate} ${startAt}:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
-            } else {
-              task.startAt = moment(`${currentDate} 00:00:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
-            }
-
-            if (endAt){
-              task.endAt = moment(`${currentDate} ${endAt}:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
-            }
-          }
-
-          if (color){
-            task.color = color;
-          }
-
-          tasks.push(task);
-        } 
-      }
-
-      await this.$db.removeWhere('tasks', { piece: this.value });
-      if (tasks.length)
-        await this.$db.createMany('tasks', tasks);
-
-      await this.$db.update('pieces', this.value, { content: this.content });
-
-      return true;
+      return await this.$utils.updatePieceContent(this.data, this.content);
     },
 
     async checkUpdate(){
