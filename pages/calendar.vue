@@ -158,9 +158,10 @@ $cell-height: 50px;
 $date-cell-height: 60px;
 
 .calendar {
-  margin: 1em 0 1em 1em;
+  margin: 1em;
   border-left: $border;
   display: flex;
+  background-color: white;
 
   .column {
     position: relative;

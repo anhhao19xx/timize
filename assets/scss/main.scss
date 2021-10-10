@@ -1,0 +1,19 @@
+@import 'colors.scss';
+@import 'md-content.scss';
+
+@import url('https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.4.1/css/simple-line-icons.css');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600&display=swap');
+
+$font-family-base: 'Quicksand', Roboto;
+$headings-font-family: 'Josefin Sans', Roboto;
+$headings-font-weight: 600;
+
+@import 'bootstrap/scss/bootstrap.scss';
+@import 'bootstrap-vue/src/index.scss';
+
+body {
+  background-color: $primary-bg;
+  overflow-y: scroll;
+}

@@ -1,6 +1,5 @@
 module.exports = {
   ssr: false,
-  srcDir: './client',
   router: {
     mode: 'hash'
   },
@@ -13,6 +12,6 @@ module.exports = {
     bootstrapVueCSS: false // Or `bvCSS: false`
   },
   css: [
-    '~/assets/scss/app.scss'
+    '~/assets/scss/main.scss'
   ]
 }

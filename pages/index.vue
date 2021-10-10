@@ -168,6 +168,7 @@ export default {
       margin: 1em 0;
       min-height: 5em;
       border-radius: .5em;
+      background-color: white;
       
       .time {
         position: absolute;
