@@ -1,4 +1,4 @@
-@import 'colors.scss';
+@import 'constants.scss';
 @import 'md-content.scss';
 
 @import url('https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.4.1/css/simple-line-icons.css');
@@ -10,10 +10,60 @@ $font-family-base: 'Quicksand', Roboto;
 $headings-font-family: 'Josefin Sans', Roboto;
 $headings-font-weight: 600;
 
+$primary: #000;
+$secondary: #646464;
+
 @import 'bootstrap/scss/bootstrap.scss';
 @import 'bootstrap-vue/src/index.scss';
 
+:root {
+  --primary: #000;
+  --secondary: #646464;
+
+  --primary-bg: #f0f0f0;
+  --secondary-bg: #fff;
+  --border: #e0e0e0;
+}
+
+[theme="dark"] {
+  --primary: #fff;
+  --secondary: #e0e0e0;
+
+  --primary-bg: #212121;
+  --secondary-bg: #424242;
+  --border: #212121;
+}
+
 body {
-  background-color: $primary-bg;
+  background-color: var(--primary-bg);
+  color: var(--primary);
   overflow-y: scroll;
+}
+
+.heading {
+  font-family: $headings-font-family;
+  font-weight: $headings-font-weight;
+}
+
+.m-container {
+  padding: 1em;
+}
+
+.m-panel {
+  background-color: var(--secondary-bg);
+  padding: 1em;
+  border-radius: $radius;
+}
+
+.m-table {
+  width: 100%;
+
+  thead {
+    background-color: var(--primary-bg);
+  }
+
+  td, th {
+    border: 1px solid var(--border);
+    padding: .5em .8em;
+  }
 }

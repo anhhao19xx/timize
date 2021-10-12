@@ -137,6 +137,7 @@ export default {
 <style lang="scss" scoped>
 .timeline {
   padding-left: 6em;
+  padding-right: 1em;
 
   .add-piece {
     width: 40px;
@@ -163,12 +164,12 @@ export default {
 
     .piece {
       position: relative;
-      border: 1px solid #e0e0e0;
+      border: 1px solid var(--border);
       padding: .5em 2.8em .5em 1em;
       margin: 1em 0;
       min-height: 5em;
       border-radius: .5em;
-      background-color: white;
+      background-color: var(--secondary-bg);
       
       .time {
         position: absolute;

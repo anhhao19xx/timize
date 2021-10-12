@@ -2,6 +2,8 @@ import moment from 'moment';
 
 import md from './md';
 import db from './db';
+import createHttpPlugin from './http';
+import createApiPlugin from './api';
 
 const R_DATE = /^[0-9]{4}[0-1][0-9][0-3][0-9]$/;
 const R_TIMERANGE = /^([0-2]*[0-9]:[0-5]*[0-9])-([0-2]*[0-9]:[0-5]*[0-9])/;
@@ -102,4 +104,10 @@ export default ({ app }, inject) => {
       return true;
     }
   });
+
+  const http = createHttpPlugin(app);
+  const api = createApiPlugin(app, http);
+
+  inject('http', http);
+  inject('api', api);
 }

@@ -23,6 +23,7 @@
     "vue2-editor": "^2.10.2"
   },
   "devDependencies": {
+    "axios": "^0.23.0",
     "bootstrap-vue": "^2.21.2",
     "fibers": "^5.0.0",
     "node-sass": "^4.12.0",

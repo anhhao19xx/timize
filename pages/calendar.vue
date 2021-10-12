@@ -153,7 +153,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$border: 1px solid #EAEAEA;
+$border: 1px solid var(--border);
 $cell-height: 50px;
 $date-cell-height: 60px;
 
@@ -161,7 +161,7 @@ $date-cell-height: 60px;
   margin: 1em;
   border-left: $border;
   display: flex;
-  background-color: white;
+  background-color: var(--secondary-bg);
 
   .column {
     position: relative;
@@ -203,7 +203,7 @@ $date-cell-height: 60px;
           line-height: 50px;
           height: 50px;
           width: 100%;
-          background-color: white;
+          background-color: var(--secondary-bg);
           font-size: .6em;
         }
       }
@@ -216,8 +216,8 @@ $date-cell-height: 60px;
       .event {
         position: absolute;
         font-size: .8em;
-        border-right: 1px solid white;
-        border-bottom: 1px solid white;
+        border-right: 1px solid var(--secondary-bg);
+        border-bottom: 1px solid var(--secondary-bg);
         overflow: hidden;
         
         .content {

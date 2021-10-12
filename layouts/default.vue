@@ -32,21 +32,21 @@
 
     <!-- MENUBAR -->
     <div class="m-menubar">
-      <nuxt-link to="/" class="m-button">
+      <nuxt-link to="/" class="m-button" :active="checkActive('/')">
         <span class="icon-wrapper">
           <i class="icon icon-clock"></i>
         </span>
         <span class="m-menu-label">Timeline</span>
       </nuxt-link>
 
-      <nuxt-link to="/tasks" class="m-button">
+      <nuxt-link to="/tasks" class="m-button" :active="checkActive('/tasks')">
         <span class="icon-wrapper">
           <i class="icon icon-list"></i>
         </span>
         <span class="m-menu-label">Tasks</span>
       </nuxt-link>
 
-      <nuxt-link to="/calendar" class="m-button">
+      <nuxt-link to="/calendar" class="m-button" :active="checkActive('/calendar')">
         <span class="icon-wrapper">
           <i class="icon icon-calendar"></i>
         </span>
@@ -57,7 +57,29 @@
 
     <!-- SIDEBAR -->
     <div class="m-sidebar">
+      <!-- THEME SWITCH -->
+      <div class="m-theme-switch m-widget">
+        <label for="">Theme</label>
+        <button class="m-button dark" @click="setTheme('dark')" :active="currentTheme === 'dark'">Dark</button>
+        <button class="m-button light" @click="setTheme('light')" :active="currentTheme === 'light'">Light</button>
+      </div>
+      <!-- END THEME SWITCH -->
 
+      <!-- API KEY -->
+      <div class="m-widget">
+        <label for="">Api Key</label>
+        <b-form-input class="mb-2" v-model="formApiKey"></b-form-input>
+        <b-button variant="primary" size="sm" @click="saveApiKey">Save</b-button>
+      </div>
+      <!-- END API KEY -->
+
+      <!-- SYNC -->
+      <div class="m-widget" v-if="apikey">
+        <label for="">Sync</label>
+        <b-button variant="primary" size="sm" @click="loadCloudData">Load</b-button>
+        <b-button variant="primary" size="sm" @click="saveCloudData">Save</b-button>
+      </div>
+      <!-- END SYNC -->
     </div>
     <!-- END SIDEBAR -->
 
@@ -91,12 +113,19 @@ function download(filename, text) {
 export default {
   components: { CommonGadget },
 
+  data(){
+    return {
+      currentTheme: null,
+      formApiKey: null
+    }
+  },
+
   computed: {
-    ...mapState(['data'])
+    ...mapState(['data', 'apikey'])
   },
 
   methods: {
-    ...mapMutations(['incDataVer']),
+    ...mapMutations(['incDataVer', 'setApiKey', 'loadInfo', 'loadApiKey', 'pushNotice']),
 
     async importFromFile(event){
       const file = event.target.files[0];
@@ -119,17 +148,82 @@ export default {
       download(`timize - ${moment().format('YYYYMMDD HHmmss')}.json`, await this.$db.exportDB());
       
       this.$store.commit('pushNotice', { text: 'Exported', type: 'success' });
+    },
+
+    setTheme(type){
+      this.currentTheme = type;
+      localStorage.setItem('theme', this.currentTheme)
+      document.body.setAttribute('theme', this.currentTheme);
+    },
+
+    checkActive(path){
+      return this.$route.path === path;
+    },
+
+    async saveApiKey(){
+      this.setApiKey(this.formApiKey);
+      await this.loadData();
+      if (this.apikey){
+        this.pushNotice({ type: 'success', text: 'Imported Api Key'});
+      } else {
+        this.pushNotice({ type: 'danger', text: 'Invalid Api Key'});
+      }
+      
+    },
+
+    async loadData(){
+      const { app, user } = await this.$api.info();
+      if (!user){
+        this.setApiKey(null);
+        return;
+      }
+    },
+
+    async loadCloudData(){
+      const confirm = await this.$bvModal.msgBoxConfirm('Are you sure?');
+      if (!confirm)
+        return;
+
+      const data = await this.$api.load();
+      await this.$db.importDB(data);
+
+      this.incDataVer();
+
+      this.$store.commit('pushNotice', { text: 'Loaded', type: 'success' });
+    },
+
+    async saveCloudData(){
+      const confirm = await this.$bvModal.msgBoxConfirm('Are you sure?');
+      if (!confirm)
+        return;
+
+      if (await this.$api.save(await this.$db.exportDB())){
+        this.$store.commit('pushNotice', { text: 'Saved', type: 'success' });
+      } else {
+        this.$store.commit('pushNotice', { text: 'Something wrong', type: 'success' });
+      }
     }
-  }
+  },
+
+  async mounted(){
+    this.loadApiKey();
+    await this.loadData();
+
+    if (this.apikey)
+      this.formApiKey = this.apikey;
+
+    this.$nextTick(() => {
+      this.setTheme(localStorage.getItem('theme') || 'light');
+    });
+  },
 }
 </script>
-
 
 <style lang="scss" scoped>
 @use "sass:math";
 @use "sass:color";
 
-@import '@/assets/scss/colors.scss';
+@import '@/assets/scss/constants.scss';
 
 $top-bar-height: 50px;
 $top-bar-padding: 10px;
@@ -144,7 +238,7 @@ $top-bar-padding: 10px;
   .m-topbar,
   .m-menubar,
   .m-sidebar {
-    background-color: $secondary-bg;
+    background-color: var(--secondary-bg);
     position: fixed;
     z-index: 100;
   }
@@ -154,7 +248,7 @@ $top-bar-padding: 10px;
     height: $top-bar-height;
     padding: $top-bar-padding ($top-bar-padding / 2);
     
-    border-bottom: 1px solid $border;
+    border-bottom: 1px solid var(--border);
     display: flex;
     
     .m-button {
@@ -164,13 +258,14 @@ $top-bar-padding: 10px;
       padding: 0;
       margin: 0 ($top-bar-padding / 2);
       font-size: inherit;
+      color: var(--primary);
 
       display: block;
       background-color: transparent;
       border: none;
       text-align: center;
       cursor: pointer;
-      border-radius: $top-bar-padding / 3;
+      border-radius: $radius;
       font-family: inherit;
       text-decoration: none;
 
@@ -191,7 +286,7 @@ $top-bar-padding: 10px;
       font-size: .85em;
 
       display: block;
-      background-color: $primary-bg;
+      background-color: var(--primary-bg);
       border: none;
       padding: 0 ($control-size / 2);
       border-radius: $control-size / 2;
@@ -204,7 +299,7 @@ $top-bar-padding: 10px;
     .m-input:active,
     .m-input:focus {
       outline: none;
-      background-color: darken($primary-bg, .1);
+      background-color: var(--primary-bg);
     }
 
     .fill {
@@ -224,20 +319,22 @@ $top-bar-padding: 10px;
     width: $top-bar-height;
     padding: 0 ($top-bar-padding / 2);
 
-    border-right: 1px solid $border;
+    border-right: 1px solid var(--border);
 
     .m-button {
       padding: $top-bar-padding / 2;
       margin: ($top-bar-padding / 2) 0;
+      position: relative;
+      overflow: hidden;
 
       width: 100%;
       display: block;
       text-decoration: none;
-      color: $primary;
-      border-radius: $control-size / 3;
+      color: var(--primary);
+      border-radius: $radius;
+      cursor: pointer;
 
       white-space: nowrap;
-      overflow: hidden;
 
       transition: all .1s;
 
@@ -252,7 +349,15 @@ $top-bar-padding: 10px;
 
     .m-button:hover,
     .m-button[active] {
-      background-color: $primary-bg;
+      background-color: var(--primary-bg);
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background-color: var(--border);
+      max-width: 80%;
+      margin: 0 auto;
     }
   }
 
@@ -260,10 +365,80 @@ $top-bar-padding: 10px;
     width: $top-bar-height * 5;
   }
 
+  #op-menubar:not(:checked)~.m-menubar {
+    .m-button:hover {
+      overflow: visible;
+
+      .m-menu-label {
+        position: absolute;
+        background-color: var(--secondary-bg);
+        left: $control-size + $top-bar-padding * 3;
+        border: 1px solid var(--border);
+        padding: 0 $top-bar-padding;
+        top: 0;
+        height: $control-size + $top-bar-padding;
+        line-height: $control-size + $top-bar-padding;
+        border-radius: $radius;
+      }
+
+      .m-menu-label:before {
+        content: ' ';
+        width: $control-size / 2;
+        height: $control-size / 2;
+        display: block;
+        position: absolute;
+        left: - $control-size / 30 * 8;
+        top: $control-size / 30 * 11;
+        transform: rotate(45deg);
+        background-color: var(--secondary-bg);
+        border-left: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+    }
+  }
+
   .m-sidebar {
     width: $top-bar-height * 5;
     right: -$top-bar-height * 5;
-    border-left: 1px solid $border;
+    border-left: 1px solid var(--border);
+
+    .m-widget {
+      padding: $top-bar-padding;
+
+      label {
+        font-size: .8em;
+        display: block;
+        width: 100%;
+        text-transform: uppercase;
+      }
+    }
+
+    .m-theme-switch {
+      overflow: hidden;
+
+      .m-button {
+        width: 50%;
+        height: $control-size * 2;
+        line-height: $control-size * 2;
+        display: block;
+        border: none;
+        float: left;
+
+        &.light {
+          background-color: var(--light);
+          color: --var('dark');
+        }
+
+        &.dark {
+          background-color: var(--dark);
+          color: var(--light);
+        }
+
+        &[active] {
+          border: 3px solid lightgreen;
+        }
+      }
+    }
   }
 
   #op-sidebar:checked~.m-sidebar {
