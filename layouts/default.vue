@@ -172,8 +172,13 @@ export default {
     },
 
     async loadData(){
-      const { app, user } = await this.$api.info();
-      if (!user){
+      try {
+        const { app, user } = await this.$api.info();
+        if (!user){
+          this.setApiKey(null);
+          return;
+        }
+      } catch(err){
         this.setApiKey(null);
         return;
       }

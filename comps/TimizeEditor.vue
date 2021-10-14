@@ -8,7 +8,7 @@
       @input="onInput"
     ></b-form-textarea>
 
-    <MdViewer :value="previewData" class="content-preview" @change="onInput"></MdViewer>
+    <MdViewer :value="previewData" class="content-preview" @change="onInput" @route="$emit('route', $event)"></MdViewer>
   </div>
 </template>
 

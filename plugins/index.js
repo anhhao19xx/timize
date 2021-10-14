@@ -34,10 +34,20 @@ export default ({ app }, inject) => {
       const tokens = md.lexer(content);
       let currentDate = null;
 
-      const hashesAndTaskItems = extract(tokens, ['hash', 'taskitem'])
+      const headings = extract(tokens, ['heading'])
+      const hashesAndTaskItems = extract(tokens, ['hash', 'taskitem']);
 
+      let title = '';
       const tasks = [];
 
+      // heading
+      for (let heading of headings)
+        if (heading.depth === 1){
+          title = heading.text;
+          break;
+        }
+
+      // hash & taskitem
       let index = 0;
       for (let token of hashesAndTaskItems){
         if (token.type === 'hash' && R_DATE.test(token.text))
@@ -99,7 +109,7 @@ export default ({ app }, inject) => {
       if (tasks.length)
         await db.createMany('tasks', tasks);
 
-      await db.update('pieces', piece.id, { content: content });
+      await db.update('pieces', piece.id, { title: title || piece.title, content: content });
 
       return true;
     }

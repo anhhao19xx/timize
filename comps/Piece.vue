@@ -3,7 +3,7 @@
     <label class="bg" @click="close"></label>
     <div class="wrapper">
       <div class="editor-wrapper">
-        <TimizeEditor v-model="content" @input="onInput"></TimizeEditor>
+        <TimizeEditor v-model="content" @input="onInput" @route="doRoute"></TimizeEditor>
       </div>
       <div class="status-bar">
         <div class="state" :enabled="state === 'unsaved'">Unsaved</div>
@@ -92,6 +92,13 @@ export default {
         this.pushNotice({ text: 'Updated', type: 'success' });
 
       this.$emit('input', null);
+    },
+
+    async doRoute(route){
+      await this.update();
+      if (route.query.id){
+        this.$emit('input', parseInt(route.query.id));
+      }
     }
   },
   
@@ -130,7 +137,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 10;
+  z-index: 100;
 
   label.bg {
     background-color: rgba(0, 0, 0, .5);

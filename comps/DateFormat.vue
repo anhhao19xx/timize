@@ -31,6 +31,7 @@ export default {
     font-size: 1.5em;
     font-weight: bold;
     display: inline-block;
+    font-family: 'Josefin Sans', sans-serif;
   }
 
   .date-detail {

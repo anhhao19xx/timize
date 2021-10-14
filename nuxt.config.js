@@ -6,7 +6,8 @@ module.exports = {
     mode: 'hash'
   },
   plugins: [
-    '~/plugins/index.js'
+    '~/plugins/index.js',
+    '~/plugins/clipboard.js'
   ],
   publicRuntimeConfig: {
     apiUrl: mode === 'production' ? 'https://timize.anhhao.me' : 'http://localhost:3001/timize'

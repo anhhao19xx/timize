@@ -1,5 +1,22 @@
 <template>
-  <div class="timeline">
+  <div class="timeline" ref="container">
+    <div class="piece-group">
+      <h4>Top</h4>
+      <div v-if="top" class="piece top">
+        <div class="top-bar">
+          <b-button @click="selectPiece(top)" variant="outline-primary" size="sm">
+            <i class="icon icon-pencil"></i>
+          </b-button>
+        </div>
+        <MdViewer 
+          class="content" 
+          :value="top.content" 
+          @change="updatePieceContent(top, $event)"
+          @route="doRoute"
+        ></MdViewer>
+      </div>
+    </div>
+
     <b-button variant="primary" class="add-piece" @click="addPiece"><big>+</big></b-button>
 
     <div v-for="item in dataGroupByDate" :key="item.groupValue" class="piece-group">
@@ -11,12 +28,27 @@
           <b-button @click="selectPiece(piece)" variant="outline-primary" size="sm">
             <i class="icon icon-pencil"></i>
           </b-button>
+          <b-button @click="copyPiece(piece)" variant="outline-primary" size="sm">
+            <i class="icon icon-link"></i>
+          </b-button>
+          <b-button @click="sharePiece(piece)" variant="outline-primary" size="sm">
+            <i class="icon icon-share"></i>
+          </b-button>
           <b-button @click="removePiece(piece)" variant="outline-danger" size="sm">
             <i class="icon icon-trash"></i>
           </b-button>
         </div>
-        <MdViewer class="content" :value="piece.content" @change="updatePieceContent(piece, $event)"></MdViewer>
+        <MdViewer 
+          class="content" 
+          :value="piece.content" 
+          @change="updatePieceContent(piece, $event)"
+          @route="doRoute"
+        ></MdViewer>
       </div>
+    </div>
+
+    <div class="text-center pb-5">
+      <b-button variant="outline-primary" v-if="isMore" @click="loadMore">More</b-button>
     </div>
 
     <Piece v-model="currentPiece"/>
@@ -32,12 +64,16 @@ import DateFormat from '../comps/DateFormat.vue';
 import Piece from '../comps/Piece.vue';
 import MdViewer from '../comps/MdViewer.vue';
 
+const LIMIT_PER_PAGE = 20;
+
 export default {
   components: { TimizeEditor, DateFormat, Piece, MdViewer },
 
   data(){
     return {
       data: [],
+      page: 1,
+      top: null,
 
       currentPiece: null,
       currentPieceContent: null
@@ -68,6 +104,10 @@ export default {
       }
 
       return ls;
+    },
+
+    isMore(){
+      return this.data.length === this.page * LIMIT_PER_PAGE
     }
   },
 
@@ -79,7 +119,29 @@ export default {
     },
 
     async syncData(){
-      this.data = await this.$db.list('pieces', { $limit: -1, $sort: { createdAt: -1 } });
+      this.data = await this.$db.list('pieces', { $limit: LIMIT_PER_PAGE * this.page, $sort: { createdAt: -1 } });
+      this.top = await this.$db.get('pieces', 1);
+
+      if (this.top)
+        return;
+
+      const createdAt = moment('1970/01/01').toDate();
+      await this.$db.create('pieces', {
+        id: 0,
+        title: `Index piece`,
+        content: '',
+        createdAt: createdAt.toString(),
+        updatedAt: createdAt.toString()
+      });
+      this.top = await this.$db.get('pieces', 1);
+    },
+
+    async loadMore(){
+      if (!this.isMore)
+        return;
+
+      this.page++;
+      this.syncData();
     },
 
     async addPiece(){
@@ -101,6 +163,16 @@ export default {
       this.currentPiece = piece.id;
     },
 
+    copyPiece(piece){
+      const container = this.$refs.container;
+      this.$copyText(`[${piece.title}](#/?id=${piece.id})`, container);
+      this.pushNotice({ type: 'success', text: 'Copied'});
+    },
+
+    sharePiece(piece){
+      
+    },
+
     async removePiece(piece){
       await this.$db.removeWhere('tasks', { piece: piece.id });
       await this.$db.remove('pieces', piece.id);
@@ -114,10 +186,22 @@ export default {
       await this.syncData();
 
       this.pushNotice({ text: 'Updated', type: 'success' });
+    },
+
+    async doQuery(query=this.$route.query){
+      const { id } = query || {};
+      if (id && !this.currentPiece){
+        this.currentPiece = parseInt(id);
+      }
+    },
+
+    doRoute(route){
+      this.doQuery(route.query);
     }
   },
 
   async mounted(){
+    await this.doQuery();
     await this.syncData();
   },
 
@@ -127,8 +211,15 @@ export default {
     },
 
     async currentPiece(){
-      if (this.currentPiece === null)
+      if (this.currentPiece === null){
         await this.syncData();
+      }
+    },
+
+    watch: {
+      async $route(){
+        await this.doQuery();
+      }
     }
   }
 }
@@ -165,9 +256,9 @@ export default {
     .piece {
       position: relative;
       border: 1px solid var(--border);
-      padding: .5em 2.8em .5em 1em;
+      padding: 1em 2.8em .5em 1em;
       margin: 1em 0;
-      min-height: 5em;
+      min-height: 9.5em;
       border-radius: .5em;
       background-color: var(--secondary-bg);
       
