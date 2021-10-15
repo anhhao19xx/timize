@@ -68,8 +68,9 @@
       <!-- API KEY -->
       <div class="m-widget">
         <label for="">Api Key</label>
-        <b-form-input class="mb-2" v-model="formApiKey"></b-form-input>
-        <b-button variant="primary" size="sm" @click="saveApiKey">Save</b-button>
+        <b-form-input class="mb-2" v-model="formApiKey" v-if="!apikey"></b-form-input>
+        <b-button variant="primary" size="sm" @click="saveApiKey" v-if="!apikey">Save</b-button>
+        <b-button variant="primary" size="sm" @click="clearApiKey" v-if="apikey">Clear</b-button>
       </div>
       <!-- END API KEY -->
 
@@ -169,6 +170,12 @@ export default {
         this.pushNotice({ type: 'danger', text: 'Invalid Api Key'});
       }
       
+    },
+
+    async clearApiKey(){
+      this.setApiKey(null);
+      this.formApiKey = '';
+      this.pushNotice({ type: 'success', text: 'Cleared'});
     },
 
     async loadData(){
@@ -423,11 +430,11 @@ $top-bar-padding: 10px;
 
       .m-button {
         width: 50%;
-        height: $control-size * 2;
-        line-height: $control-size * 2;
+        line-height: $control-size;
         display: block;
         border: none;
         float: left;
+        border: 3px solid transparent;
 
         &.light {
           background-color: var(--light);

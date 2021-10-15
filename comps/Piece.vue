@@ -5,16 +5,24 @@
       <div class="editor-wrapper">
         <TimizeEditor v-model="content" @input="onInput" @route="doRoute"></TimizeEditor>
       </div>
-      <div class="status-bar">
-        <div class="state" :enabled="state === 'unsaved'">Unsaved</div>
-        <div class="state" :enabled="state === 'saving'">Saving</div>
-        <div class="state" :enabled="state === 'saved'">Saved</div>
+      <div class="bottom-bar">
+        <div class="status">
+          <div class="state" :enabled="state === 'unsaved'">Unsaved</div>
+          <div class="state" :enabled="state === 'saving'">Saving</div>
+          <div class="state" :enabled="state === 'saved'">Saved</div>
+        </div>
+
+        <div class="info">
+          <div class="state">Shared</div>
+          <div class="state">Outdated</div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import moment from 'moment';
 import { mapState, mapActions, mapMutations } from 'vuex';
 import TimizeEditor from './TimizeEditor.vue';
 
@@ -39,6 +47,10 @@ export default {
 
   methods: {
     ...mapMutations(['pushNotice']),
+
+    formatDate(d){
+      return moment(d).format('YYYY-MM-DD HH:mm')
+    },
 
     async loadData(){
       this.data = await this.$db.get('pieces', this.value);
@@ -164,16 +176,22 @@ export default {
       height: calc(100% - 30px);
     }
 
-    .status-bar {
+    .bottom-bar {
       height: 30px;
       line-height: 30px;
       display: flex;
+      justify-content: space-between;
+
+      .status,
+      .info {
+        display: flex;
+      }
 
       .state {
         text-transform: uppercase;
         color: #c0c0c0;
-        font-size: .7em;
         font-weight: bold;
+        font-size: .7em;
         margin: 0 .5em;
       }
 

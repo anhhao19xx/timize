@@ -109,7 +109,11 @@ export default ({ app }, inject) => {
       if (tasks.length)
         await db.createMany('tasks', tasks);
 
-      await db.update('pieces', piece.id, { title: title || piece.title, content: content });
+      await db.update('pieces', piece.id, { 
+        title: title || piece.title, 
+        content: content,
+        updatedAt: (new Date()).toString()
+      });
 
       return true;
     }
