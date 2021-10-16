@@ -2,12 +2,12 @@
   <div class="timeline" ref="container">
     <div class="piece-group">
       <h4>Top</h4>
-      <div v-if="top" class="piece top">
-        <div class="top-bar">
+      <div v-if="top" class="piece top" @click="handleSelectPiece($event, top)">
+        <!-- <div class="top-bar">
           <b-button @click="selectPiece(top)" variant="outline-primary" size="sm">
             <i class="icon icon-pencil"></i>
           </b-button>
-        </div>
+        </div> -->
         <MdViewer 
           class="content" 
           :value="top.content" 
@@ -22,12 +22,12 @@
     <div v-for="item in dataGroupByDate" :key="item.groupValue" class="piece-group">
       <DateFormat :date="item.groupValue"></DateFormat>
 
-      <div v-for="piece in item.list" :key="piece.id" class="piece">
+      <div v-for="piece in item.list" :key="piece.id" class="piece" @click="handleSelectPiece($event, piece)">
         <div class="time">{{ formatTime(piece.createdAt) }}</div>
         <div class="top-bar">
-          <b-button @click="selectPiece(piece)" variant="outline-primary" size="sm">
+          <!-- <b-button @click="selectPiece(piece)" variant="outline-primary" size="sm">
             <i class="icon icon-pencil"></i>
-          </b-button>
+          </b-button> -->
           <b-button @click="copyPiece(piece)" variant="outline-primary" size="sm">
             <i class="icon icon-link"></i>
           </b-button>
@@ -161,6 +161,14 @@ export default {
 
     selectPiece(piece){
       this.currentPiece = piece.id;
+    },
+
+    handleSelectPiece(e, piece){
+      if (['A', 'LABEL', 'INPUT'].indexOf(e.target.tagName) !== -1){
+        return;
+      }
+
+      this.selectPiece(piece);
     },
 
     copyPiece(piece){
