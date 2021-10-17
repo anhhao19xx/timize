@@ -6,13 +6,15 @@
       <DateFormat :date="item.groupValue" v-if="item.groupBy === 'startAt'"></DateFormat>
       <div class="group-title" v-if="!item.groupBy">{{ item.groupValue }}</div>
 
-      <div v-for="task in item.list" :key="`task-${task.id}`" class="task">
-        <div v-if="task.endAt" class="time-range">
-          <div class="startAt">{{ formatTime(task.startAt) }}</div>
-          <div class="endAt">{{ formatTime(task.endAt) }}</div>
+      <div class="group-tasks">
+        <div v-for="task in item.list" :key="`task-${task.id}`" class="task">
+          <div v-if="task.endAt" class="time-range">
+            <div class="startAt">{{ formatTime(task.startAt) }}</div>
+            <div class="endAt">{{ formatTime(task.endAt) }}</div>
+          </div>
+          <input type="checkbox" onclick="return false;"/>
+          <label class="todo" v-html="task.todo" @click="selectPiece(task.piece)"></label>
         </div>
-        <input type="checkbox" onclick="return false;"/>
-        <label class="todo" v-html="task.todo" @click="selectPiece(task.piece)"></label>
       </div>
     </div>
   </div>
@@ -109,11 +111,19 @@ export default {
 <style lang="scss" scoped>
 .tasks {
   padding-left: 6em;
+  padding-right: 1em;
 
   .group-title {
     font-size: 1.5em;
     font-weight: bold;
     margin-bottom: 1em;
+  }
+
+  .group-tasks {
+    border: 1px solid var(--border);
+    border-radius: .5em;
+    padding: .5em 1em;
+    background-color: var(--secondary-bg);
   }
 
   .task-group {
@@ -129,7 +139,7 @@ export default {
       .time-range {
         position: absolute;
         top: -.2em;
-        left: -5em;
+        left: -6em;
         width: 5em;
         text-align: center;
 
@@ -144,7 +154,7 @@ export default {
       }
 
       input {
-        margin: 0 1em;
+        margin: 0 1em 0 0;
         display: inline;
       }
 
