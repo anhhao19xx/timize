@@ -16,8 +16,8 @@
       </div>
       <div class="wrapper">
         <div class="cell" v-for="hour in hours" :key="`${day}-${hour}`"></div>
-        <div class="event" v-for="event in getEventFromTask(day)" :key="event.task.id" :style="event.style" @click="selectPiece(event.task.piece)">
-          <div class="content" :style="event.contentStyle">{{ event.task.todo }}</div>
+        <div class="event" v-for="event in getEventFromTask(day)" :key="event.task.id" :style="generateEventStyle(event).style" @click="selectPiece(event.task.piece)">
+          <div class="content" :style="generateEventStyle(event).contentStyle">{{ event.task.todo }}</div>
         </div>
       </div>
     </div>
@@ -112,22 +112,56 @@ export default {
 
         let startAtHour = taskStartAt.hour() + Math.floor(taskStartAt.minute()/15)/4;
         let endAtHour = taskEndAt.hour() + Math.floor(taskEndAt.minute()/15)/4;
+
+        // overlaps event
+        let overlaps = [];
+        let levels = [];
+        for (let item of ls){
+          if (endAtHour <= item.startAtHour || startAtHour >= item.endAtHour)
+            continue;
+
+          overlaps.push(item);
+          levels.push(item.level);
+        }
+
+        let level = 1;
+        while (levels.indexOf(level) !== -1){
+          level++;
+        }
+        levels.push(level);
+
+        let maxLevel = Math.max.apply(null, levels);
+        for (let item of overlaps)
+          item.maxLevel = maxLevel;
+
+        // return
           
         ls.push({
-          task,
-          style: {
-            top: `${startAtHour/24*100}%`,
-            height: `${(endAtHour - startAtHour)/24*100}%`,
-            width: `100%`
-          },
-          contentStyle: {
-            'background-color': this.mapColor(task.color) || COLORS['grey'],
-            opacity: task.done ? 0.5 : 1
-          }
+          startAtHour,
+          endAtHour,
+          level,
+          maxLevel,
+          task
         });
       }
 
       return ls;
+    },
+
+    generateEventStyle({ startAtHour, endAtHour, task, level, maxLevel }){
+
+      return {
+        style: {
+          top: `${startAtHour/24*100}%`,
+          height: `${(endAtHour - startAtHour)/24*100}%`,
+          width: `${100/maxLevel}%`,
+          left: `${100/maxLevel * (level - 1)}%`
+        },
+        contentStyle: {
+          'background-color': this.mapColor(task.color) || COLORS['grey'],
+          opacity: task.done ? 0.5 : 1
+        }
+      }
     },
 
     selectPiece(id){
