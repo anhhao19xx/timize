@@ -8,6 +8,7 @@ import createApiPlugin from './api';
 const R_DATE = /^[0-9]{4}[0-1][0-9][0-3][0-9]$/;
 const R_TIMERANGE = /^([0-2]*[0-9]:[0-5]*[0-9])-([0-2]*[0-9]:[0-5]*[0-9])/;
 const R_COLOR = /^(red|green|blue|pink|purple|indigo|cyan|teal|lime|yellow|amber|orange|brown|grey)/;
+const R_LOCAL_LINK = /^\#\/\?id\=(.*)$/;
 
 function extract(tokens, types){
   let ls = [];
@@ -19,6 +20,10 @@ function extract(tokens, types){
 
     if (token.tokens){
       ls = ls.concat(extract(token.tokens, types));
+    }
+
+    if (token.items){
+      ls = ls.concat(extract(token.items, types));
     }
   }
 
@@ -34,11 +39,23 @@ export default ({ app }, inject) => {
       const tokens = md.lexer(content);
       let currentDate = null;
 
+      const rawLinks = extract(tokens, ['link'])
       const headings = extract(tokens, ['heading'])
       const hashesAndTaskItems = extract(tokens, ['hash', 'taskitem']);
 
       let title = '';
       const tasks = [];
+      const links = [];
+
+      // local links
+      for (let link of rawLinks){
+        let res = R_LOCAL_LINK.exec(link.href);
+
+        if (!res)
+          continue;
+
+        links.push(parseInt(res[1]));
+      }
 
       // heading
       for (let heading of headings)
@@ -112,7 +129,8 @@ export default ({ app }, inject) => {
       await db.update('pieces', piece.id, { 
         title: title || piece.title, 
         content: content,
-        updatedAt: (new Date()).toString()
+        updatedAt: (new Date()).toString(),
+        links
       });
 
       return true;

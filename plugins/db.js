@@ -21,13 +21,15 @@ const extractControls = (doc, controlNames) => {
 }
 
 const db = new Dexie("TimizeDB");
-db.version(6).stores({
-  pieces: '++id,title,content,createdAt,updatedAt,sharedAt',
+db.version(7).stores({
+  pieces: '++id,title,content,createdAt,updatedAt,sharedAt,links',
   tasks: '++id,todo,startAt,endAt,createdAt,piece,index,done,color',
   registers: '++id,key,value'
 });
 
 export default {
+  db, 
+
   async importDB(jsonString){
     const idbDatabase = db.backendDB();
 

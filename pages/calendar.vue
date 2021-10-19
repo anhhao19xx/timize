@@ -155,7 +155,7 @@ export default {
           top: `${startAtHour/24*100}%`,
           height: `${(endAtHour - startAtHour)/24*100}%`,
           width: `${100/maxLevel}%`,
-          left: `${100/maxLevel * (level - 1)}%`
+          left: `${100/maxLevel * ( level - 1)}%`
         },
         contentStyle: {
           'background-color': this.mapColor(task.color) || COLORS['grey'],

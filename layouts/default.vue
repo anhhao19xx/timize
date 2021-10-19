@@ -52,6 +52,13 @@
         </span>
         <span class="m-menu-label">Calendar</span>
       </nuxt-link>
+
+      <nuxt-link to="/relationship" class="m-button" :active="checkActive('/relationship')">
+        <span class="icon-wrapper">
+          <i class="icon icon-link"></i>
+        </span>
+        <span class="m-menu-label">Relationship</span>
+      </nuxt-link>
     </div>
     <!-- END MENUBAR -->
 
@@ -460,6 +467,7 @@ $top-bar-padding: 10px;
   .m-content {
     padding-top: $top-bar-height;
     padding-left: $top-bar-height;
+    min-height: calc(100vh - $top-bar-height);
   }
 }
 </style>
