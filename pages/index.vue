@@ -164,7 +164,7 @@ export default {
     },
 
     handleSelectPiece(e, piece){
-      if (['A', 'LABEL', 'INPUT'].indexOf(e.target.tagName) !== -1){
+      if (['A', 'LABEL', 'INPUT', 'BUTTON'].indexOf(e.target.tagName) !== -1){
         return;
       }
 
@@ -178,7 +178,7 @@ export default {
     },
 
     sharePiece(piece){
-      
+      // this.api.
     },
 
     async removePiece(piece){

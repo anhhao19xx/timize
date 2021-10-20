@@ -79,6 +79,13 @@ export default (app, http) => {
       }
 
       return box.content;
+    },
+
+    async share(piece){
+      // console.log(store.state)
+      // await http.post(`/api/shares`, {
+      //   box: 
+      // })
     }
   }
 }
