@@ -81,7 +81,7 @@ export default {
   },
 
   computed: {
-    ...mapState(['dataVersion']), 
+    ...mapState(['dataVersion', 'searchText']), 
 
     dataGroupByDate(){
       const dates = {};
@@ -119,7 +119,13 @@ export default {
     },
 
     async syncData(){
-      this.data = await this.$db.list('pieces', { $limit: LIMIT_PER_PAGE * this.page, $sort: { createdAt: -1 } });
+      const query = { $limit: LIMIT_PER_PAGE * this.page, $sort: { createdAt: -1 } };
+
+      if (this.searchText){
+        query.$search = { $text: this.searchText };
+      }
+
+      this.data = await this.$db.list('pieces', query);
       this.top = await this.$db.get('pieces', 1);
 
       if (this.top)
@@ -200,7 +206,11 @@ export default {
       const { id } = query || {};
       if (id && !this.currentPiece){
         this.currentPiece = parseInt(id);
+        return;
       }
+
+      this.page = 1;
+      await this.syncData();
     },
 
     doRoute(route){
@@ -224,10 +234,12 @@ export default {
       }
     },
 
-    watch: {
-      async $route(){
-        await this.doQuery();
-      }
+    async $route(){
+      await this.doQuery();
+    },
+
+    async searchText(){
+      await this.doQuery();
     }
   }
 }

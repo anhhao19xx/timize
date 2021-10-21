@@ -23,8 +23,7 @@ const extractControls = (doc, controlNames) => {
 const db = new Dexie("TimizeDB");
 db.version(7).stores({
   pieces: '++id,title,content,createdAt,updatedAt,sharedAt,links',
-  tasks: '++id,todo,startAt,endAt,createdAt,piece,index,done,color',
-  registers: '++id,key,value'
+  tasks: '++id,todo,startAt,endAt,createdAt,piece,index,done,color'
 });
 
 export default {
@@ -71,9 +70,13 @@ export default {
   },
 
   async list(storeName, query = {}){
-    const { doc, controls } = extractControls(query, ['$limit', '$skip', '$sort'])
+    const { doc, controls } = extractControls(query, ['$limit', '$skip', '$sort', '$search'])
 
     let queryBuilder = db[storeName];
+
+    if (controls.$search && controls.$search.$text){
+      queryBuilder = queryBuilder.where('title').startsWithIgnoreCase(controls.$search.$text);
+    }
 
     if (Object.keys(doc).length > 0){
       queryBuilder = queryBuilder.filter(originDoc => {
@@ -85,15 +88,6 @@ export default {
       });
     }
 
-    if (controls.$sort){
-      const key = Object.keys(controls.$sort)[0];
-      queryBuilder = queryBuilder.orderBy(key);
-
-      if (controls.$sort[key] === -1){
-        queryBuilder = queryBuilder.reverse();
-      }
-    }
-  
     if (controls.$skip){
       queryBuilder = queryBuilder.offset(controls.$skip);
     }
@@ -102,7 +96,17 @@ export default {
       queryBuilder = queryBuilder.limit(controls.$limit);
     }
 
-    return await queryBuilder.toArray()
+    if (controls.$sort){
+      const key = Object.keys(controls.$sort)[0];
+
+      if (controls.$sort[key] === -1){
+        queryBuilder = queryBuilder.reverse();
+      }
+
+      return await queryBuilder.sortBy(key);
+    } else {
+      return await queryBuilder.toArray()
+    }
   },
 
   async create(storeName, doc){

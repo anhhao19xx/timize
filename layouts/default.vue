@@ -22,7 +22,7 @@
         <i class="icon icon-cloud-download"></i>
       </button>
 
-      <input type="text" class="m-input fill">
+      <input type="text" class="m-input fill" @keyup.enter="makeSearch" v-model="searchText">
 
       <label class="m-button" for="op-sidebar">
         <i class="icon icon-settings"></i>
@@ -124,7 +124,8 @@ export default {
   data(){
     return {
       currentTheme: null,
-      formApiKey: null
+      formApiKey: null,
+      searchText: ''
     }
   },
 
@@ -133,7 +134,7 @@ export default {
   },
 
   methods: {
-    ...mapMutations(['incDataVer', 'setApiKey', 'loadInfo', 'loadApiKey', 'pushNotice']),
+    ...mapMutations(['incDataVer', 'setApiKey', 'loadInfo', 'loadApiKey', 'pushNotice', 'setSearchText']),
 
     async importFromFile(event){
       const file = event.target.files[0];
@@ -221,16 +222,22 @@ export default {
       } else {
         this.$store.commit('pushNotice', { text: 'Something wrong', type: 'success' });
       }
+    },
+
+    makeSearch(){
+      this.setSearchText(this.searchText);
     }
   },
 
   async mounted(){
+    // apikey
     this.loadApiKey();
     await this.loadData();
 
     if (this.apikey)
       this.formApiKey = this.apikey;
 
+    // theme
     this.$nextTick(() => {
       this.setTheme(localStorage.getItem('theme') || 'light');
     });

@@ -9,7 +9,10 @@ export const state = () => ({
   isNotice: false,
   notices: [],
 
-  dataVersion: 0
+  dataVersion: 0,
+
+  // search
+  searchText: ''
 })
 
 export const mutations = {
@@ -62,6 +65,11 @@ export const mutations = {
   incDataVer(state){
     state.dataVersion++;
   },
+
+  // search
+  setSearchText(state, value){
+    state.searchText = value;
+  }
 }
 
 export const actions = {}
