@@ -1,22 +1,33 @@
 <template>
-  <div class="tasks">
-    <Piece v-model="currentPiece"/>
-    
-    <div v-for="item in taskGroupByStartAt" :key="item.groupValue" class="task-group">
-      <DateFormat :date="item.groupValue" v-if="item.groupBy === 'startAt'"></DateFormat>
-      <div class="group-title" v-if="!item.groupBy">{{ item.groupValue }}</div>
+  <div class="main">
+    <!-- TASKS -->
+    <div class="tasks">
+      <Piece v-model="currentPiece"/>
+      
+      <div v-for="item in taskGroupByStartAt" :key="item.groupValue" class="task-group">
+        <DateFormat :date="item.groupValue" v-if="item.groupBy === 'startAt'"></DateFormat>
+        <div class="group-title" v-if="!item.groupBy">{{ item.groupValue }}</div>
 
-      <div class="group-tasks">
-        <div v-for="task in item.list" :key="`task-${task.id}`" class="task">
-          <div v-if="task.endAt" class="time-range">
-            <div class="startAt">{{ formatTime(task.startAt) }}</div>
-            <div class="endAt">{{ formatTime(task.endAt) }}</div>
+        <div class="group-tasks">
+          <div v-for="task in item.list" :key="`task-${task.id}`" class="task">
+            <div v-if="task.endAt" class="time-range">
+              <div class="startAt">{{ formatTime(task.startAt) }}</div>
+              <div class="endAt">{{ formatTime(task.endAt) }}</div>
+            </div>
+            <input type="checkbox" onclick="return false;"/>
+            <label class="todo" v-html="task.todo" @click="selectPiece(task.piece)"></label>
           </div>
-          <input type="checkbox" onclick="return false;"/>
-          <label class="todo" v-html="task.todo" @click="selectPiece(task.piece)"></label>
         </div>
       </div>
     </div>
+    <!-- END TASKS -->
+
+    <!-- TIME TRACKING -->
+    <div class="time-tracking">
+      <div class="group-title">Time Tracking</div>
+      <StopWatch class="clock"/>
+    </div>
+    <!-- END TIME TRACKING -->
   </div>
 </template>
 
@@ -25,9 +36,10 @@ import moment from 'moment';
 import { mapState } from 'vuex';
 import DateFormat from '../comps/DateFormat';
 import Piece from '../comps/Piece.vue';
+import StopWatch from '../comps/StopWatch.vue';
 
 export default {
-  components: { DateFormat, Piece },
+  components: { DateFormat, Piece, StopWatch },
 
   data(){
     return {
@@ -109,15 +121,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.main {
+  display: flex;
+  padding: 1em 1em 1em 0;
+}
+
+.group-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 1em;
+}
+
 .tasks {
+  width: 70%;
   padding-left: 6em;
   padding-right: 1em;
-
-  .group-title {
-    font-size: 1.5em;
-    font-weight: bold;
-    margin-bottom: 1em;
-  }
 
   .group-tasks {
     border: 1px solid var(--border);
@@ -162,6 +180,22 @@ export default {
         display: inline;
       }
     }
+  }
+}
+
+.time-tracking {
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 70px;
+  margin-top: 30px;
+  width: 30%;
+  height: fit-content;
+
+  .clock {
+    background-color: var(--secondary-bg);
+    border: 1px solid var(--border);
+    border-radius: .5em;
+    padding: .5em 1em;
   }
 }
 </style>
