@@ -474,7 +474,7 @@ $top-bar-padding: 10px;
   .m-content {
     padding-top: $top-bar-height;
     padding-left: $top-bar-height;
-    min-height: calc(100vh - $top-bar-height);
+    min-height: calc(100vh - 50px);
   }
 }
 </style>
