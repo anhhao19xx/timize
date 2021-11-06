@@ -133,7 +133,7 @@ export default {
 
       const createdAt = moment('1970/01/01').toDate();
       await this.$db.create('pieces', {
-        id: 0,
+        id: 1,
         title: `Index piece`,
         content: '',
         createdAt: createdAt.toString(),

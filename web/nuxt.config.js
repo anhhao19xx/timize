@@ -6,8 +6,9 @@ module.exports = {
     mode: 'hash'
   },
   plugins: [
-    '~/plugins/index.js',
-    '~/plugins/clipboard.js'
+    { src: 'node_modules/nuxt-minimal-admin' },
+    { src: '~/plugins/index.js' },
+    { src: '~/plugins/clipboard.js' }
   ],
   publicRuntimeConfig: {
     apiUrl: mode === 'production' ? 'https://timize.anhhao.me' : 'http://localhost:3001/timize'

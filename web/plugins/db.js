@@ -21,9 +21,10 @@ const extractControls = (doc, controlNames) => {
 }
 
 const db = new Dexie("TimizeDB");
-db.version(7).stores({
+db.version(8).stores({
   pieces: '++id,title,content,createdAt,updatedAt,sharedAt,links',
-  tasks: '++id,todo,startAt,endAt,createdAt,piece,index,done,color'
+  tasks: '++id,todo,startAt,endAt,createdAt,piece,index,done,color',
+  transactions: '++id,amount,note,source,wallet,category,createdAt,updatedAt'
 });
 
 export default {

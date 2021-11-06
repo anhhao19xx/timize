@@ -1,18 +1,8 @@
 <template>
-  <div class="m-app">
-    <CommonGadget/>
-
-    <!-- UI CONTROLS -->
-    <input type="checkbox" class="m-ui-control" id="op-menubar">
-    <input type="checkbox" class="m-ui-control" id="op-sidebar">
-    <!-- END UI CONTROLS -->
-
-    <!-- TOPBAR -->
-    <div class="m-topbar">
-      <label class="m-button" for="op-menubar">
-        <i class="icon icon-menu"></i>
-      </label>
-
+  <m-default-layout
+    :menuItems="menuItems"
+  >
+    <template v-slot:topbar>
       <input type="file" class="d-none" @change="importFromFile" id="import-from-file">
       <label for="import-from-file" class="m-button">
         <i class="icon icon-cloud-upload"></i>
@@ -23,55 +13,9 @@
       </button>
 
       <input type="text" class="m-input fill" @keyup.enter="makeSearch" v-model="searchText">
+    </template>
 
-      <label class="m-button" for="op-sidebar">
-        <i class="icon icon-settings"></i>
-      </label>
-    </div>
-    <!-- END TOPBAR -->
-
-    <!-- MENUBAR -->
-    <div class="m-menubar">
-      <nuxt-link to="/" class="m-button" :active="checkActive('/')">
-        <span class="icon-wrapper">
-          <i class="icon icon-clock"></i>
-        </span>
-        <span class="m-menu-label">Timeline</span>
-      </nuxt-link>
-
-      <nuxt-link to="/tasks" class="m-button" :active="checkActive('/tasks')">
-        <span class="icon-wrapper">
-          <i class="icon icon-list"></i>
-        </span>
-        <span class="m-menu-label">Tasks</span>
-      </nuxt-link>
-
-      <nuxt-link to="/calendar" class="m-button" :active="checkActive('/calendar')">
-        <span class="icon-wrapper">
-          <i class="icon icon-calendar"></i>
-        </span>
-        <span class="m-menu-label">Calendar</span>
-      </nuxt-link>
-
-      <nuxt-link to="/relationship" class="m-button" :active="checkActive('/relationship')">
-        <span class="icon-wrapper">
-          <i class="icon icon-link"></i>
-        </span>
-        <span class="m-menu-label">Relationship</span>
-      </nuxt-link>
-    </div>
-    <!-- END MENUBAR -->
-
-    <!-- SIDEBAR -->
-    <div class="m-sidebar">
-      <!-- THEME SWITCH -->
-      <div class="m-theme-switch m-widget">
-        <label for="">Theme</label>
-        <button class="m-button dark" @click="setTheme('dark')" :active="currentTheme === 'dark'">Dark</button>
-        <button class="m-button light" @click="setTheme('light')" :active="currentTheme === 'light'">Light</button>
-      </div>
-      <!-- END THEME SWITCH -->
-
+    <template v-slot:sidebar>
       <!-- API KEY -->
       <div class="m-widget">
         <label for="">Api Key</label>
@@ -88,15 +32,10 @@
         <b-button variant="primary" size="sm" @click="saveCloudData">Save</b-button>
       </div>
       <!-- END SYNC -->
-    </div>
-    <!-- END SIDEBAR -->
+    </template>
 
-    <!-- CONTENT -->
-    <div class="m-content">
-      <Nuxt />
-    </div>
-    <!-- END CONTENT -->
-  </div>
+    <Nuxt />
+  </m-default-layout>
 </template>
 
 <script>
@@ -130,7 +69,18 @@ export default {
   },
 
   computed: {
-    ...mapState(['data', 'apikey'])
+    ...mapState(['data', 'apikey']),
+
+    menuItems(){
+      return [
+        { label: 'Timeline', icon: 'clock', type: 'link', href: '/' },
+        { label: 'Tasks', icon: 'list', type: 'link', href: '/tasks' },
+        { label: 'Calendar', icon: 'calendar', type: 'link', href: '/calendar' },
+        { label: 'Relationship', icon: 'link', type: 'link', href: '/relationship' },
+        { label: 'Divider 1', icon: 'money', type: 'divider' },
+        { label: 'Finance', icon: 'diamond', type: 'link', href: '/finance' },
+      ]
+    }
   },
 
   methods: {
