@@ -21,7 +21,9 @@
     "nuxt-minimal-admin": "0.0.3",
     "qs": "^6.10.1",
     "vue": "^2.6.14",
+    "vue-currency-input": "^2.3.0",
     "vue-d3-network": "^0.1.28",
+    "vue-search-select": "^2.9.5",
     "vue2-editor": "^2.10.2"
   },
   "devDependencies": {

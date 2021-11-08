@@ -1,11 +1,10 @@
 <template>
   <div class="transaction-form" v-if="editValue">
     <b-form-group label="Amount">
-      <b-input
+      <currency-input
         :value="editValue['amount']"
         @input="updateValue('amount', $event)"
-        type="number"
-      ></b-input>
+      ></currency-input>
     </b-form-group>
 
     <b-form-group label="Note">
@@ -39,7 +38,10 @@
 </template>
 
 <script>
+import CurrencyInput from './CurrencyInput.vue';
+
 export default {
+  components: { CurrencyInput },
   props: [
     'value'
   ],

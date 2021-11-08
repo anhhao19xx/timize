@@ -138,6 +138,16 @@ export default ({ app }, inject) => {
 
     isEquals(val1, val2){
       return JSON.stringify(val1) === JSON.stringify(val2);
+    },
+
+    formatCurrency(amount, lang='vi-VN', currency='vnd'){
+      const formatter = new Intl.NumberFormat(lang, {
+        style: 'currency',
+        currency,
+        maximumFractionDigits: 0,
+      });
+      
+      return formatter.format(amount);
     }
   });
 

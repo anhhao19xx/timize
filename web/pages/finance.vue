@@ -44,6 +44,8 @@ export default {
 
     createTransaction(){
       console.log(this.form);
+
+      this.initValue();
     }
   },
 
