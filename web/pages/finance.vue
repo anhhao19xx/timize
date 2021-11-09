@@ -42,8 +42,14 @@ export default {
       }
     },
 
-    createTransaction(){
-      console.log(this.form);
+    async createTransaction(){
+      const createdAt = new Date();
+
+      await this.$db.create('transactions', {
+        ...this.form,
+        createdAt: createdAt.toString(),
+        updatedAt: createdAt.toString()
+      });
 
       this.initValue();
     }

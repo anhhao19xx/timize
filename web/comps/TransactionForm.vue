@@ -15,41 +15,48 @@
     </b-form-group>
 
     <b-form-group label="Source">
-      <b-input
+      <select-or-create
         :value="editValue['source']"
         @input="updateValue('source', $event)"
-      ></b-input>
+      ></select-or-create>
     </b-form-group>
 
     <b-form-group label="Wallet">
-      <b-input
+      <select-or-create
         :value="editValue['wallet']"
         @input="updateValue('wallet', $event)"
-      ></b-input>
+      ></select-or-create>
     </b-form-group>
 
     <b-form-group label="Category">
-      <b-input
+      <select-or-create
         :value="editValue['category']"
         @input="updateValue('category', $event)"
-      ></b-input>
+      ></select-or-create>
     </b-form-group>
   </div>
 </template>
 
 <script>
 import CurrencyInput from './CurrencyInput.vue';
+import SelectOrCreate from './SelectOrCreate.vue';
 
 export default {
-  components: { CurrencyInput },
+  components: { 
+    CurrencyInput,
+    SelectOrCreate
+  },
+
   props: [
     'value'
   ],
+
   data(){
     return {
       editValue: null
     };
   },
+
   methods: {
     updateValue(fieldName, value){
       this.$set(this.editValue, fieldName, value);
@@ -62,9 +69,11 @@ export default {
       this.editValue = JSON.parse(JSON.stringify(this.value || {}));
     }
   },
+
   mounted(){
     this.initValue();
   },
+
   watch: {
     value: {
       deep: true,
