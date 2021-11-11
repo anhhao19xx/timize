@@ -1,7 +1,66 @@
 <template>
   <div class="finance m-container">
-    <div class="m-panel">
-      <h4>Finance</h4>
+    <div class="row">
+      <div class="col col-4">
+        <div class="m-panel">
+          <h4>Sources</h4>
+
+          <table class="m-table">
+            <thead>
+              <th>Name</th>
+              <th>Amount</th>
+            </thead>
+            <tbody>
+              <tr v-for="source in sources" :key="`source-tbody-${source.name}`">
+                <td>{{ source.name }}</td>
+                <td class="amount" :type="source.amount >= 0 ? 'income' : 'expense'">{{ $utils.formatCurrency(source.amount) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col col-4">
+        <div class="m-panel">
+          <h4>Wallets</h4>
+
+          <table class="m-table">
+            <thead>
+              <th>Name</th>
+              <th>Amount</th>
+            </thead>
+            <tbody>
+              <tr v-for="wallet in wallets" :key="`wallet-tbody-${wallet.name}`">
+                <td>{{ wallet.name }}</td>
+                <td class="amount" :type="wallet.amount >= 0 ? 'income' : 'expense'">{{ $utils.formatCurrency(wallet.amount) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col col-4">
+        <div class="m-panel">
+          <h4>Categories</h4>
+
+          <table class="m-table">
+            <thead>
+              <th>Name</th>
+              <th>Amount</th>
+            </thead>
+            <tbody>
+              <tr v-for="category in categories" :key="`category-tbody-${category.name}`">
+                <td>{{ category.name }}</td>
+                <td class="amount" :type="category.amount >= 0 ? 'income' : 'expense'">{{ $utils.formatCurrency(category.amount) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="m-panel mt-3">
+      <h4>Transactions</h4>
 
       <!-- toolbar -->
       <b-button variant="primary" size="sm" v-b-modal.create-transaction>Create</b-button>
@@ -32,7 +91,7 @@
           <th class="m-tools-cell"></th>
         </thead>
         <tbody>
-          <tr v-for="doc in data" :key="`tbody-${doc.id}`">
+          <tr v-for="doc in data" :key="`transaction-tbody-${doc.id}`">
             <!-- select -->
             <td class="m-select-cell">
               <b-form-checkbox :value="doc._id" class="mr-0"></b-form-checkbox>
@@ -74,7 +133,11 @@ export default {
   data(){
     return {
       form: null,
-      data: []
+      data: [],
+
+      sources: [],
+      categories: [],
+      wallets: []
     }
   },
 
@@ -120,6 +183,53 @@ export default {
 
       this.initValue();
       this.load();
+    },
+
+    preprocess(){
+      this.sources = [];
+      this.categories = [];
+      this.wallets = [];
+
+      const sources = {};
+      const categories = {};
+      const wallets = {};
+
+      for (let item of this.data){
+        if (!sources[item.source])
+          sources[item.source] = 0;
+
+        if (!wallets[item.wallet])
+          wallets[item.wallet] = 0;
+
+        if (!categories[item.category])
+          categories[item.category] = 0;
+
+
+        sources[item.source] += item.amount;
+        wallets[item.wallet] += item.amount;
+        categories[item.category] += item.amount;
+      }
+
+      for (let name in sources){
+        this.sources.push({
+          name,
+          amount: sources[name]
+        });
+      }
+
+      for (let name in wallets){
+        this.wallets.push({
+          name,
+          amount: wallets[name]
+        });
+      }
+
+      for (let name in categories){
+        this.categories.push({
+          name,
+          amount: categories[name]
+        });
+      }
     },
 
     async load(){
