@@ -68,7 +68,12 @@
         id="create-transaction" 
         title="Add transaction"
         @ok="createTransaction">
-        <transaction-form v-model="form"></transaction-form>
+        <transaction-form
+          v-model="form"
+          :sources="sources.map(item => item.name)"
+          :wallets="wallets.map(item => item.name)"
+          :categories="categories.map(item => item.name)"
+        ></transaction-form>
       </b-modal>
       <!-- end toolbar -->
 

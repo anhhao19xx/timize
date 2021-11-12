@@ -16,6 +16,7 @@
 
     <b-form-group label="Source">
       <select-or-create
+        :options="sources"
         :value="editValue['source']"
         @input="updateValue('source', $event)"
       ></select-or-create>
@@ -23,6 +24,7 @@
 
     <b-form-group label="Wallet">
       <select-or-create
+        :options="wallets"
         :value="editValue['wallet']"
         @input="updateValue('wallet', $event)"
       ></select-or-create>
@@ -30,6 +32,7 @@
 
     <b-form-group label="Category">
       <select-or-create
+        :options="categories"
         :value="editValue['category']"
         @input="updateValue('category', $event)"
       ></select-or-create>
@@ -48,7 +51,10 @@ export default {
   },
 
   props: [
-    'value'
+    'value',
+    'sources',
+    'wallets',
+    'categories'
   ],
 
   data(){
