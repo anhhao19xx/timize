@@ -75,6 +75,17 @@
           :categories="categories.map(item => item.name)"
         ></transaction-form>
       </b-modal>
+      <b-modal 
+        id="edit-transaction" 
+        title="Edit transaction"
+        @ok="editTransaction">
+        <transaction-form
+          v-model="form"
+          :sources="sources.map(item => item.name)"
+          :wallets="wallets.map(item => item.name)"
+          :categories="categories.map(item => item.name)"
+        ></transaction-form>
+      </b-modal>
       <!-- end toolbar -->
 
       <!-- summary -->
@@ -117,8 +128,8 @@
                 <template #button-content>
                   <i class="icon-options-vertical"></i>
                 </template>
-                <b-dropdown-item>Edit</b-dropdown-item>
-                <b-dropdown-item>Remove</b-dropdown-item>
+                <b-dropdown-item-button @click="showEditTransaction(doc)">Edit</b-dropdown-item-button>
+                <b-dropdown-item-button @click="removeTransaction(doc)">Remove</b-dropdown-item-button>
               </b-dropdown>
             </td>
             <!-- end tool -->
@@ -190,6 +201,21 @@ export default {
       this.load();
     },
 
+    async editTransaction(){
+      const id = this.form.id;
+      delete this.form.id;
+      delete this.form.createdAt;
+      delete this.form.updatedAt;
+
+      await this.$db.update('transactions', id, { 
+        ...this.form,
+        updatedAt: (new Date()).toString()
+      });
+
+      this.initValue();
+      this.load();
+    },
+
     preprocess(){
       this.sources = [];
       this.categories = [];
@@ -240,8 +266,18 @@ export default {
     async load(){
       const query = { $limit: -1 };
       this.data = await this.$db.list('transactions', query);
+      this.data.reverse();
       
       this.preprocess();
+    },
+
+    showEditTransaction(doc){
+      this.form = doc;
+      this.$bvModal.show('edit-transaction');
+    },
+
+    removesTransaction(){
+
     }
   },
 
@@ -255,6 +291,7 @@ export default {
 <style lang="scss">
 .finance .amount {
   font-weight: bold;
+  text-align: right;
 }
 
 .finance .amount[type="income"] {

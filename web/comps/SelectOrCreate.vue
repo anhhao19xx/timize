@@ -82,6 +82,26 @@ export default {
       }
 
       this.$emit('input', this.item.value);
+    },
+
+    initValue(){
+      if (this.value === this.item.value)
+        return;
+
+      this.item = {
+        text: this.value,
+        value: this.value
+      }
+    }
+  },
+
+  mounted(){
+    this.initValue();
+  },
+
+  watch: {
+    value(){
+      this.initValue();
     }
   }
 }
