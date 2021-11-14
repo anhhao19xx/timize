@@ -276,8 +276,13 @@ export default {
       this.$bvModal.show('edit-transaction');
     },
 
-    removesTransaction(){
+    async removeTransaction(doc){
+      const isConfirmed = await this.$bvModal.msgBoxConfirm("Do you want to remove?");
+      if (!isConfirmed)
+        return;
 
+      await this.$db.remove('transactions', doc.id);
+      this.load();
     }
   },
 
