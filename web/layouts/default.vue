@@ -101,6 +101,7 @@ export default {
       this.incDataVer();
 
       this.$store.commit('pushNotice', { text: 'Imported', type: 'success' });
+      location.reload();
     },
 
     async exportToFile(){
