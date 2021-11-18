@@ -46,11 +46,20 @@
           <b-dropdown-item-button @click="$emit('remove', props.item)">Remove</b-dropdown-item-button>
         </b-dropdown>
       </template>
+
+      <template #custom-foot="data">
+        <tr>
+          <td v-for="field in data.fields" :key="`tfoot-${field.key}`">
+            <div v-if="field.key === 'amount'" class="amount" :type="summaryItems[0].balance >= 0 ? 'income' : 'expense'">{{ $utils.formatCurrency(summaryItems[0].balance) }}</div>
+          </td>
+        </tr>
+      </template>
     </b-table>
     <b-table
       :bordered="true"
       head-variant="light"
       :items="summaryItems"
+      v-if="showSummary"
     >
       <template #cell()="props">
         <div class="amount" :type="props.value >= 0 ? 'income' : 'expense'">{{ $utils.formatCurrency(props.value) }}</div>
@@ -69,7 +78,8 @@ export default {
     'fields',
 
     // display
-    'showTools'
+    'showTools',
+    'showSummary'
   ],
 
   data(){
@@ -163,6 +173,10 @@ export default {
   }
   th, td {
     max-width: 300px;
+  }
+
+  tfoot {
+    border-top: 2px solid var(--border);
   }
 }
 </style>

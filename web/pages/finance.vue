@@ -1,60 +1,14 @@
 <template>
   <div class="finance m-container">
     <div class="row">
-      <div class="col col-4">
+      <div class="col col-4" v-for="name in ['sources', 'wallets', 'categories']" :key="`summary-${name}`">
         <div class="m-panel">
-          <h4>Sources</h4>
+          <h4>{{ name[0].toUpperCase() + name.slice(1) }}</h4>
 
-          <table class="m-table">
-            <thead>
-              <th>Name</th>
-              <th>Amount</th>
-            </thead>
-            <tbody>
-              <tr v-for="source in sources" :key="`source-tbody-${source.name}`">
-                <td>{{ source.name }}</td>
-                <td class="amount" :type="source.amount >= 0 ? 'income' : 'expense'">{{ $utils.formatCurrency(source.amount) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="col col-4">
-        <div class="m-panel">
-          <h4>Wallets</h4>
-
-          <table class="m-table">
-            <thead>
-              <th>Name</th>
-              <th>Amount</th>
-            </thead>
-            <tbody>
-              <tr v-for="wallet in wallets" :key="`wallet-tbody-${wallet.name}`">
-                <td>{{ wallet.name }}</td>
-                <td class="amount" :type="wallet.amount >= 0 ? 'income' : 'expense'">{{ $utils.formatCurrency(wallet.amount) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="col col-4">
-        <div class="m-panel">
-          <h4>Categories</h4>
-
-          <table class="m-table">
-            <thead>
-              <th>Name</th>
-              <th>Amount</th>
-            </thead>
-            <tbody>
-              <tr v-for="category in categories" :key="`category-tbody-${category.name}`">
-                <td>{{ category.name }}</td>
-                <td class="amount" :type="category.amount >= 0 ? 'income' : 'expense'">{{ $utils.formatCurrency(category.amount) }}</td>
-              </tr>
-            </tbody>
-          </table>
+          <data-table
+            :items="name === 'sources' ? sources : (name === 'wallets' ? wallets : categories)"
+            :fields="['name', 'amount']"
+          ></data-table>
         </div>
       </div>
     </div>
@@ -88,20 +42,15 @@
       </b-modal>
       <!-- end toolbar -->
 
-      <!-- summary -->
-      <div class="summary mt-3 row">
-        <div class="col"><label>Income: </label> <span class="amount" type="income">{{ $utils.formatCurrency(totals.income) }}</span></div>
-        <div class="col"><label>Expense: </label> <span class="amount" type="expense">{{ $utils.formatCurrency(totals.expense) }}</span></div>
-      </div>
-      <!-- end summary-->
-
       <!-- info -->
       <data-table
+        class="mt-3"
         :items="data"
         :fields="['note', 'amount', 'source', 'wallet', 'category', 'createdAt']"
         :showTools="true"
         @edit="showEditTransaction"
         @remove="removeTransaction"
+        :showSummary="true"
       ></data-table>
       <!-- end info -->
     </div>
