@@ -96,11 +96,6 @@ export default {
       });
 
       await this.$db.importDB(jsonString);
-      event.target.value = null;
-
-      this.incDataVer();
-
-      this.$store.commit('pushNotice', { text: 'Imported', type: 'success' });
       location.reload();
     },
 

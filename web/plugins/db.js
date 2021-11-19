@@ -40,6 +40,8 @@ export default {
           return;
         }
 
+        console.log(jsonString);
+
         IDBExportImport.importFromJsonString(idbDatabase, jsonString, function(err) {
           if (err) {
             reject(err);
