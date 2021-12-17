@@ -18,6 +18,20 @@ module.exports = {
     bootstrapCSS: false, // Or `css: false`
     bootstrapVueCSS: false // Or `bvCSS: false`
   },
+  buildModules: [
+    '@nuxtjs/pwa',
+  ],
+  pwa: {
+    meta: {
+      title: 'Timize',
+      author: 'Vu Anh Hao <hi@anhhao.me> (https://www.anhhao.me)',
+    },
+    manifest: {
+      name: 'Timize',
+      lang: 'en',
+      short_name: 'Timize',
+    }
+  },
   css: [
     '~/assets/scss/main.scss'
   ]
