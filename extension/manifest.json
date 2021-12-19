@@ -1,0 +1,10 @@
+{
+  "name": "Timize",
+  "description": "A Productivity app for manage time and your schedule",
+  "version": "1.0",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["storage"]
+}
