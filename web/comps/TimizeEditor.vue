@@ -18,14 +18,19 @@ import 'quill/dist/quill.bubble.css'
 import { quillEditor } from 'vue-quill-editor'
 
 export default {
+  props: [
+    'value'
+  ],
+
   components: {
     quillEditor
   },
 
   data () {
     return {
-      content: '<h2>I am Example</h2>',
+      content: '',
       editorOption: {
+        theme: 'bubble',
         modules: {
           toolbar: [
             ['bold', 'italic', 'underline', 'strike'], 
@@ -63,12 +68,31 @@ export default {
 
   mounted() {
    
+  },
+
+  watch: {
+    content(){
+      this.$emit('input', this.content);
+    },
+
+    value(){
+      if (this.value === this.content)
+        return;
+
+      this.content = this.value;
+    }
   }
 }
 </script>
 
 <style lang="scss">
 .tm-editor {
-  
+  height: 100%;
+
+  .ql-editor {
+    padding: .8em;
+    font-family: Quicksand, sans-serif;
+    font-size: 12pt;
+  }
 }
 </style>

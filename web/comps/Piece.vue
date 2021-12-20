@@ -169,8 +169,7 @@ export default {
     width: 80%;
     height: 80%;
     border-radius: .5em;
-    padding: 1em 0 0 0.5em;
-    overflow: hidden;
+    padding: 0;
 
     .editor-wrapper {
       height: calc(100% - 30px);
