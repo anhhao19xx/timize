@@ -5,11 +5,11 @@
     <template v-slot:topbar>
       <input type="file" class="d-none" @change="importFromFile" id="import-from-file">
       <label for="import-from-file" class="m-button">
-        <i class="icon icon-cloud-upload"></i>
+        <ion-icon name="cloud-upload-outline"></ion-icon>
       </label>
 
       <button @click="exportToFile" class="m-button">
-        <i class="icon icon-cloud-download"></i>
+        <ion-icon name="cloud-download-outline"></ion-icon>
       </button>
 
       <input type="text" class="m-input fill" @keyup.enter="makeSearch" v-model="searchText">
@@ -73,7 +73,7 @@ export default {
 
     menuItems(){
       return [
-        { label: 'Timeline', icon: 'clock', type: 'link', href: '/' },
+        { label: 'Timeline', icon: 'time', type: 'link', href: '/' },
         { label: 'Tasks', icon: 'list', type: 'link', href: '/tasks' },
         { label: 'Calendar', icon: 'calendar', type: 'link', href: '/calendar' },
         { label: 'Relationship', icon: 'link', type: 'link', href: '/relationship' },

@@ -6,14 +6,16 @@ module.exports = {
     mode: 'hash'
   },
   plugins: [
-    { src: 'node_modules/nuxt-minimal-admin' },
     { src: '~/plugins/index.js' },
     { src: '~/plugins/clipboard.js' }
   ],
   publicRuntimeConfig: {
     apiUrl: mode === 'production' ? 'https://timize.anhhao.me' : 'http://localhost:3001/timize'
   },
-  modules: ['bootstrap-vue/nuxt'],
+  modules: [
+    'bootstrap-vue/nuxt',
+    'nuxt-minimal-admin'
+  ],
   bootstrapVue: {
     bootstrapCSS: false, // Or `css: false`
     bootstrapVueCSS: false // Or `bvCSS: false`
