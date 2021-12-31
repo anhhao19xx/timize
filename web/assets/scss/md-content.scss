@@ -1,5 +1,7 @@
 .md-content, 
-.tm-editor {
+.tm-editor .ql-editor {
+  line-height: 1.5em;
+
   a {
     text-decoration: underline;
     color: #1976D2;
@@ -39,19 +41,16 @@
     margin: 0;
 
     li {
-      padding-left: 1.5em;
+      padding-left: 0 !important;
       list-style-type: none;
 
       &:before {
-        margin-left: -1.5em;
-        margin-right: 0.3em;
-        text-align: right;
+        margin-left: 0 !important;
+        margin-right: .5em !important;
+        text-align: center;
         display: inline-block;
         white-space: nowrap;
-        width: 1.2em;
-        margin-left: -1.5em;
-        margin-right: 0.3em;
-        text-align: right;
+        width: 1.1em;
       }
     }
   }
@@ -67,5 +66,22 @@
 
   ul li::before {
     content: '\2022';
+  }
+
+  ul[data-checked] > li::before {
+    content: ' ';
+    height: 1.5em;
+    background-size: 1.1em 1.1em;
+    vertical-align: top;
+    background-repeat: no-repeat;
+    background-position: center center;
+  }
+
+  ul[data-checked=false] > li::before {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512"><title>Square</title><path d="M416 448H96a32.09 32.09 0 01-32-32V96a32.09 32.09 0 0132-32h320a32.09 32.09 0 0132 32v320a32.09 32.09 0 01-32 32z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32"/></svg>');
+  }
+
+  ul[data-checked=true] > li::before {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512"><title>Checkbox</title><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M352 176L217.6 336 160 272"/><rect x="64" y="64" width="384" height="384" rx="48" ry="48" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="32"/></svg>');
   }
 }
