@@ -1,4 +1,5 @@
 import moment from 'moment';
+import objectPath from 'object-path';
 
 import md from './md';
 import db from './db';
@@ -10,24 +11,17 @@ const R_TIMERANGE = /^([0-2]*[0-9]:[0-5]*[0-9])-([0-2]*[0-9]:[0-5]*[0-9])/;
 const R_COLOR = /^(red|green|blue|pink|purple|indigo|cyan|teal|lime|yellow|amber|orange|brown|grey)/;
 const R_LOCAL_LINK = /^\#\/\?id\=(.*)$/;
 
-function extract(tokens, types){
-  let ls = [];
-  for (let token of tokens){
-    if (types.indexOf(token.type) !== -1 ){
-      ls.push(token);
-      continue;
-    }
-
-    if (token.tokens){
-      ls = ls.concat(extract(token.tokens, types));
-    }
-
-    if (token.items){
-      ls = ls.concat(extract(token.items, types));
-    }
+function extract(content, r, resPath){
+  let res;
+  const rel = [];
+  while (res = r.exec(content)){
+    rel.push(res);
   }
 
-  return ls;
+  if (!resPath)
+    return rel;
+
+  return objectPath.get(rel, resPath);
 }
 
 export default ({ app }, inject) => {
@@ -36,7 +30,31 @@ export default ({ app }, inject) => {
 
   inject('utils', {
     async updatePieceContent(piece, content){
-      let title = '';
+      // extract title
+      const title = extract(content, /<h1>(.*?)<\/h1>/g, '0.1');
+
+      // extract tasks
+      const tasks = [];
+      let index = 0;
+      let rawTaskGroups = extract(content, /<ul data-checked="(.*?)">(.*?)<\/ul>/gm);
+      for (let rawTaskGroup of rawTaskGroups){
+        let rawTasks = extract(rawTaskGroup[2], /<li>(.*?)<\/li>/gm);
+        for (let rawTask of rawTasks){
+          let task = {
+            piece: piece.id,
+            todo: rawTask[1],
+            done: rawTaskGroup[1] === 'true',
+            index: index++,
+            createdAt: piece.createdAt.toString()
+          }
+
+          tasks.push(task);
+        }
+      }
+
+      await db.removeWhere('tasks', { piece: piece.id });
+      if (tasks.length)
+        await db.createMany('tasks', tasks);
 
       await db.update('pieces', piece.id, { 
         title: title || piece.title, 

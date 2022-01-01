@@ -19,6 +19,7 @@
     "nedb": "^1.8.0",
     "nuxt": "^2.15.8",
     "nuxt-minimal-admin": "0.0.4",
+    "object-path": "^0.11.8",
     "qs": "^6.10.1",
     "vue": "^2.6.14",
     "vue-currency-input": "^2.3.0",

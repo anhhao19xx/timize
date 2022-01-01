@@ -4,6 +4,7 @@
     ref="timizeEditor"
     v-model="content"
     :options="editorOption"
+    @keyup.native="onKeyUp($event)"
     @blur="onEditorBlur($event)"
     @focus="onEditorFocus($event)"
     @ready="onEditorReady($event)"
@@ -52,6 +53,10 @@ export default {
     },
 
     onEditorChange({ quill, html, text }) {
+      
+    },
+
+    onKeyUp(e){
       
     }
   },
