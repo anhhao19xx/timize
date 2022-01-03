@@ -1,18 +1,29 @@
 <template>
-  <quill-editor
-    class="tm-editor"
-    ref="timizeEditor"
-    v-model="content"
-    :options="editorOption"
-    @keyup.native="onKeyUp($event)"
-    @blur="onEditorBlur($event)"
-    @focus="onEditorFocus($event)"
-    @ready="onEditorReady($event)"
-  />
+  <div class="tm-editor">
+    <quill-editor
+      ref="timizeEditor"
+      v-model="content"
+      :options="editorOption"
+      @keyup.native="onKeyUp($event)"
+      @keydown.native="onKeyDown($event)"
+      @blur="onEditorBlur($event)"
+      @focus="onEditorFocus($event)"
+      @ready="onEditorReady($event)"
+    />
+    <div 
+      class="create-hashtag-popup" 
+      ref="createHashtagPopup"
+      v-if="hashtagPopup.content"
+      :style="{'top': hashtagPopup.y + 'px', left: hashtagPopup.x + 'px'}"
+      @mousedown="createHashtag"
+    >Create <b>{{ hashtagPopup.content }}</b></div>
+  </div>
 </template>
 
 <script>
 import { quillEditor } from 'vue-quill-editor'
+
+const CHANGE_RATE = 1000;
 
 export default {
   props: [
@@ -26,6 +37,13 @@ export default {
   data () {
     return {
       content: '',
+      hashtagPopup: {
+        content: '',
+        x: 0,
+        y: 0
+      },
+      lastChange: new Date(),
+
       editorOption: {
         theme: 'bubble',
         modules: {
@@ -42,23 +60,98 @@ export default {
 
   methods: {
     onEditorBlur(quill) {
-      
+      this.hashtagPopup.content = null;
     },
 
     onEditorFocus(quill) {
-      
+      this.detectHashtag();
     },
     
     onEditorReady(quill) {
-      
+      quill.keyboard.bindings[13].unshift({
+        key: 13,
+        handler: () => {
+          if (this.hashtagPopup.content){
+            this.createHashtag();
+            return false;
+          }
+
+          return true;
+        }
+      });
     },
 
     onEditorChange({ quill, html, text }) {
       
     },
 
+    scheduleChange(){
+      const now = new Date();
+      const duration = now - this.lastChange;
+
+      if (duration < CHANGE_RATE){
+        setTimeout(() => this.scheduleChange(), CHANGE_RATE - duration);
+        return;
+      }
+      this.lastChange = now;
+
+      this.detectHashtag();
+    },
+
     onKeyUp(e){
-      
+      this.scheduleChange();
+    },
+
+    onKeyDown(e){
+
+    },
+
+    detectHashtag(){
+      const selection = this.editor.getSelection();
+      if (!selection)
+        return;
+
+      const index = selection.index;
+
+      let isTag = false;
+      let i;
+      for (i = index - 1; i >= 0; i--){
+        let c = this.editor.getText(i, 1);
+        if (!/[\w#]/.test(c))
+          break;
+
+        if (c === '#'){
+          isTag = true;
+          break;
+        }
+      }
+
+      if (isTag){
+        if (!this.hashtagPopup.content){
+          const selection_dimensions = window.getSelection().getRangeAt(0).getBoundingClientRect();
+          this.hashtagPopup.x = selection_dimensions.x;
+          this.hashtagPopup.y = selection_dimensions.y;
+        }
+
+        this.hashtagPopup.content = this.editor.getText(i, index - i);
+      } else
+        this.hashtagPopup.content = null;
+    },
+
+    createHashtag(e) {
+      if (e)
+        e.preventDefault();
+
+      const index = this.editor.getSelection().index;
+      let text = this.hashtagPopup.content;
+      const start = index - text.length;
+
+      // delete hash
+      this.editor.deleteText(start, 1); 
+      text = text.slice(1);
+
+      // format
+      this.editor.formatText(start, text.length, 'hashtag', true);
     }
   },
 
@@ -91,10 +184,29 @@ export default {
 .tm-editor {
   height: 100%;
 
-  .ql-editor {
-    padding: .8em;
-    font-family: Quicksand, sans-serif;
-    font-size: 12pt;
+  .quill-editor {
+    height: 100%;
+    .ql-editor {
+      padding: .8em;
+      font-family: Quicksand, sans-serif;
+      font-size: 12pt;
+    }
+  }
+
+  .create-hashtag-popup {
+    position: fixed;
+    background-color: #fff;
+    border-radius: 15px;
+    line-height: 30px;
+    height: 30px;
+    margin-top: 30px;
+    padding: 0 .5em;
+    box-shadow: 0 .1em .4em rgba(0, 0, 0, .3);
+    cursor: pointer;
+
+    b {
+      color: #D81B60;
+    }
   }
 }
 </style>
