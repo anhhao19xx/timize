@@ -50,8 +50,7 @@ export default {
           toolbar: [
             ['bold', 'italic', 'underline', 'strike'], 
             [{ header: 1 }, { header: 2 }],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
-            ['hashtag']
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }]
           ]
         }
       }
@@ -71,6 +70,8 @@ export default {
       quill.keyboard.bindings[13].unshift({
         key: 13,
         handler: () => {
+          this.detectHashtag();
+
           if (this.hashtagPopup.content){
             this.createHashtag();
             return false;
@@ -142,16 +143,17 @@ export default {
       if (e)
         e.preventDefault();
 
-      const index = this.editor.getSelection().index;
-      let text = this.hashtagPopup.content;
-      const start = index - text.length;
-
-      // delete hash
-      this.editor.deleteText(start, 1); 
-      text = text.slice(1);
+      const text = this.hashtagPopup.content;
+      let index = this.editor.getSelection().index;
+      let start = index - text.length;
 
       // format
-      this.editor.formatText(start, text.length, 'hashtag', true);
+      this.editor.insertEmbed(start, 'hashtag', text.slice(1), true);
+
+      // delete hash
+      index = this.editor.getSelection().index;
+      start = index - text.length;
+      this.editor.deleteText(start, text.length); 
     }
   },
 

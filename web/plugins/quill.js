@@ -1,10 +1,20 @@
 import Quill from 'quill'
 
-const Inline = Quill.import('blots/inline');
+const Embed = Quill.import("blots/embed");
 const icons = Quill.import('ui/icons');
 
-class HashTag extends Inline {
-  static formats() { return true }
+class HashTag extends Embed {
+  static create(data) {
+		const node = super.create(data);
+    node.setAttribute("data-value", data);
+
+    node.innerHTML += data;
+    return node;
+  }
+
+  static value(domNode) {
+		return domNode.getAttribute("data-value");
+	}
 }
 HashTag.blotName = 'hashtag';
 HashTag.className = 'hashtag';
