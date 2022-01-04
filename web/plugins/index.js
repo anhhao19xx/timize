@@ -24,6 +24,13 @@ function extract(content, r, resPath){
   return objectPath.get(rel, resPath);
 }
 
+function stripHtml(html)
+{
+   let tmp = document.createElement("DIV");
+   tmp.innerHTML = html;
+   return tmp.textContent || tmp.innerText || "";
+}
+
 export default ({ app }, inject) => {
   inject('md', md);
   inject('db', db);
@@ -39,7 +46,7 @@ export default ({ app }, inject) => {
       let rawTaskGroups = extract(content, /<ul data-checked="(.*?)">(.*?)<\/ul>/gm);
       for (let rawTaskGroup of rawTaskGroups){
         let rawTasks = extract(rawTaskGroup[2], /<li>(.*?)<\/li>/gm);
-        for (let rawTask of rawTasks){
+        for (let rawTask of rawTasks){       
           let task = {
             piece: piece.id,
             todo: rawTask[1],
@@ -48,6 +55,17 @@ export default ({ app }, inject) => {
             createdAt: piece.createdAt.toString()
           }
 
+          let rawTimeRange = extract(rawTask[1], /<span class="timerange" data-value="(.*?)">(.*?)<\/span>/g)[0];
+
+          if (rawTimeRange){
+            task.todo = task.todo.split(rawTimeRange[0]).join('');
+            let timeRange = JSON.parse(stripHtml(rawTimeRange[1]));
+            task.startAt = moment(timeRange.from).toDate().toString();
+            task.endAt = moment(timeRange.to).toDate().toString();
+            task.color = timeRange.color || 'grey';
+          }
+
+          task.todo = stripHtml(task.todo).trim();
           tasks.push(task);
         }
       }

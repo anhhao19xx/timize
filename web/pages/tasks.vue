@@ -1,7 +1,7 @@
 <template>
   <div class="main">
     <!-- TASKS -->
-    <div class="tasks">
+    <div class="tasks md-content">
       <Piece v-model="currentPiece"/>
       
       <div v-for="item in taskGroupByStartAt" :key="item.groupValue" class="task-group">
