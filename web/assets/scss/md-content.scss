@@ -94,4 +94,19 @@
   .hashtag:before {
     content: '#';
   }
+
+  .timerange {
+    span {
+      padding: 0 .5em;
+      color: white;
+      font-size: .8em;
+      font-weight: bold;
+      border-radius: .5em;
+      box-sizing: border-box;
+      display: inline-block;
+      margin: 0 -.3em;
+      height: 2em;
+      line-height: 2.25em;
+    }
+  }
 }
