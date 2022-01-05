@@ -1,16 +1,17 @@
 <template>
-  <div class="tm-hour-column">
+  <div class="tm-hour-column" :dragType="eventAction.type">
     <div class="cell" v-for="hour in hours" :key="`hour-${hour}`"></div>
     <div class="event" 
       v-for="event in localValue" 
       :key="`event-${event.task.id}`" 
       :style="generateEventStyle(event).main" 
+      @mousedown="startEventAction('move', $event, event)"
     >
       <div 
         class="content" 
         :style="generateEventStyle(event).content"
       >{{ event.task.todo }}</div>
-      <div class="resize" @mousedown="startEventResize($event, event)"></div>
+      <div class="resize" @mousedown="startEventAction('resize', $event, event)"></div>
     </div>
   </div>
 </template>
@@ -23,7 +24,8 @@ export default {
 
   data(){
     return {
-      eventResize: {
+      eventAction: {
+        type: '',
         event: null,
         y: 0,
         offsetHeight: 0
@@ -50,11 +52,13 @@ export default {
     },
 
     generateEventStyle(event){
-      const { startAtHour, endAtHour, offsetHour, task, level, maxLevel } = event;
+      const { startAtHour, endAtHour, offsetHour, translateHour, task, level, maxLevel } = event;
+
+      console.log(translateHour);
 
       return {
         main: {
-          top: `${startAtHour/24*100}%`,
+          top: `${(startAtHour + translateHour)/24*100}%`,
           height: `${(endAtHour - startAtHour + offsetHour)/24*100}%`,
           width: `${100/maxLevel}%`,
           left: `${100/maxLevel * ( level - 1)}%`
@@ -67,32 +71,48 @@ export default {
       };
     },
 
-    startEventResize(e, event){
+    startEventAction(type, e, event){
       e.preventDefault();
-      this.eventResize.event = event;
-      this.eventResize.y = e.pageY;
-      this.eventResize.wrapperHeight = e.target.parentElement.parentElement.offsetHeight;
+
+      if (this.eventAction.event)
+        return;
+
+      this.eventAction.type = type;
+      this.eventAction.event = event;
+      this.eventAction.y = e.pageY;
+      this.eventAction.wrapperHeight = e.target.parentElement.parentElement.offsetHeight;
     },
 
-    doEventResize(e){
-      const length = e.pageY - this.eventResize.y;
+    doEventAction(e){
+      const length = e.pageY - this.eventAction.y;
 
-      const { startAtHour, endAtHour } = this.eventResize.event;
-      let offsetHour = Math.round(length/this.eventResize.wrapperHeight*24*2)/2;
-      if (endAtHour - startAtHour + offsetHour < 0.5)
-        offsetHour = 0.5 - endAtHour + startAtHour;
-        
-      this.eventResize.event.offsetHour = offsetHour;
-    },
+      const { startAtHour, endAtHour } = this.eventAction.event;
 
-    endEventResize(e){
-      this.doEventResize(e);
-      if (this.eventResize.event.offsetHour){
-        this.eventResize.event.endAtHour += this.eventResize.event.offsetHour;
-        this.eventResize.event.offsetHour = 0; 
-        this.$emit('updateEvent', this.eventResize.event);
+      if (this.eventAction.type === 'resize'){
+        let offsetHour = Math.round(length/this.eventAction.wrapperHeight*24*2)/2;
+        if (endAtHour - startAtHour + offsetHour < 0.5)
+          offsetHour = 0.5 - endAtHour + startAtHour;
+          
+        this.eventAction.event.offsetHour = offsetHour;
+      } else {
+        let translateHour = Math.round(length/this.eventAction.wrapperHeight*24*2)/2;
+        this.eventAction.event.translateHour = translateHour;
       }
-      this.eventResize.event = null;
+    },
+
+    endEventAction(e){
+      this.doEventAction(e);
+      if (this.eventAction.event.offsetHour){
+        if (this.eventAction.type === 'resize'){
+          this.eventAction.event.endAtHour += this.eventAction.event.offsetHour;
+          this.eventAction.event.offsetHour = 0; 
+        }
+
+        this.$emit('updateEvent', this.eventAction.event);
+      }
+
+      this.eventAction.event = null;
+      this.eventAction.type = '';
     },
 
     async load(){
@@ -111,13 +131,13 @@ export default {
     this.load();
     
     this.mouseUpEvent = window.addEventListener('mouseup', e => {
-      if (this.eventResize.event)
-        this.endEventResize(e);
+      if (this.eventAction.event)
+        this.endEventAction(e);
     });
 
     this.mouseMoveEvent = window.addEventListener('mousemove', e => {
-      if (this.eventResize.event)
-        this.doEventResize(e);
+      if (this.eventAction.event)
+        this.doEventAction(e);
     });
   },
 
@@ -156,7 +176,8 @@ $cell-height: 50px;
     border-right: 1px solid var(--secondary-bg);
     border-bottom: 1px solid var(--secondary-bg);
     overflow: hidden;
-    
+    cursor: pointer;
+
     .content {
       color: white;
       width: 100%;

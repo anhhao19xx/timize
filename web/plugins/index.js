@@ -40,6 +40,8 @@ function stripHtml(html)
 function forEachTask(content, fn){
   let index = 0;
   let rawTaskGroups = extract(content, /<ul data-checked="(.*?)">(.*?)<\/ul>/gm);
+  let offsetIndex = 0;
+
   for (let rawTaskGroup of rawTaskGroups){
     let rawTasks = extract(rawTaskGroup[2], /<li>(.*?)<\/li>/gm);
     let newGroupContent = '';
@@ -81,12 +83,15 @@ function forEachTask(content, fn){
         makeTimeRangeTag(node, JSON.stringify(dataValue));
 
         task.raw = `${node.outerHTML} ${task.todo}`;
+      } else {
+        task.raw = task.todo;
       }
 
       newGroupContent += `<ul data-checked="${task.done}"><li>${task.raw}</li></ul>`;
     }
 
-    content = replaceContent(content, rawTaskGroup.index, rawTaskGroup[0].length, newGroupContent);
+    content = replaceContent(content, rawTaskGroup.index + offsetIndex, rawTaskGroup[0].length, newGroupContent);
+    offsetIndex += newGroupContent.length - rawTaskGroup[0].length;
   }
 
   return content;
@@ -122,13 +127,12 @@ export default ({ app }, inject) => {
       return true;
     },
 
-    async updateTask(task){
+    async updateTask(task){      
       const piece = await db.get('pieces', task.piece);
 
       const content = forEachTask(piece.content, oldTask => {
         if (oldTask.index !== task.index)
           return oldTask;
-
         return task;
       });
 
