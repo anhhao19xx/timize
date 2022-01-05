@@ -72,7 +72,7 @@ export default {
     },
 
     startAt(){
-      return moment().day(0).set({ hour: 0, minute: 0 }).toDate();
+      return moment().day(0).set({ hour: 0, minute: 0, second: 0 }).toDate();
     }
   },
 

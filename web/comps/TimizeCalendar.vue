@@ -35,18 +35,6 @@
             :style="{ height: `${HOUR_HEIGHT}px`}"
           ></div>
         </div>
-
-        <div
-          class="fragment"
-          v-if="ghostFragment"
-          :style="ghostFragment.style.main"
-          >
-          <div 
-            class="content"
-            :style="ghostFragment.style.content"
-          ></div>
-        </div>
-
         <div 
           class="fragment"
           v-for="fragment in fragments" 
@@ -54,12 +42,34 @@
           :style="fragment.style.main" 
         >
           <div 
-            class="content"
+            :class="`content`"
             :style="fragment.style.content"
             @mousedown="startFragmentAction('move', $event, fragment)"
+            @click="showTaskInfo(fragment)"
           >
             {{ fragment.task.todo }}
           </div>
+
+          <b-dropdown class="setting">
+            <b-dropdown-form>
+              <b-form-group>
+                <b-checkbox @input="updateTask(fragment, 'done', $event)" :checked="fragment.task.done">Done</b-checkbox>
+              </b-form-group>
+              <b-form-group class="color-group">
+                <b-button
+                  class="color"
+                  :data-checked="fragment.task.color === name"
+                  v-for="(color, name) in COLORS" 
+                  :style="{ color: color }"
+                  :key="`color-${name}`"
+                  @click="updateTask(fragment, 'color', name)"
+                ></b-button>
+              </b-form-group>
+            </b-dropdown-form>
+          </b-dropdown>
+
+          <!-- <b-checkbox class="check"></b-checkbox> -->
+
           <div class="resize" @mousedown="startFragmentAction('resize', $event, fragment)"></div>
         </div>
       </div>
@@ -99,6 +109,7 @@ export default {
       ghostFragment: null,
 
       HOUR_HEIGHT,
+      COLORS
     }
   },
 
@@ -179,8 +190,7 @@ export default {
         },
         
         content: {
-          'background-color': this.mapColor(task.color) || COLORS['grey'],
-          opacity: task.done ? 0.5 : 1
+          'background-color': task.done ? '#c0c0c0' : (this.mapColor(task.color) || COLORS['grey'])
         }
       };
     },
@@ -200,6 +210,10 @@ export default {
           this.unscheduleTasks.push(task);
           continue;
         }
+
+        if (moment(task.startAt).diff(this.localStartAt, 'days') >= this.localNumberDay){
+          continue;
+        };
 
         while (taskStartAt.isBefore(taskEndAt, 'day')){
           this.fragments.push({
@@ -382,6 +396,17 @@ export default {
 
     allowDropTask(e){
       e.preventDefault();
+    },
+
+    showTaskInfo(fragment){
+      console.log(fragment);
+    },
+
+    updateTask(fragment, name, value){
+      fragment.task[name] = value;
+      this.buildFragmentStyle(fragment);
+
+      this.$emit('updateTask', fragment.task);
     }
   },
 
@@ -424,7 +449,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 $border: 1px solid var(--border);
 $label-cell-height: 60px;
 $time-column-width: 50px;
@@ -503,8 +528,6 @@ $time-column-width: 50px;
       display: flex;
       flex: 1;
       position: relative;
-      overflow: hidden;
-      padding-bottom: 1px;
 
       .column {
         flex: 1;
@@ -521,7 +544,7 @@ $time-column-width: 50px;
           color: white;
           width: 100%;
           height: 100%;
-          padding: .2em .4em;
+          padding: 2.5px 25px 5.5px 5px;
           border-radius: 4px;
         }
 
@@ -530,8 +553,81 @@ $time-column-width: 50px;
           width: 100%;
           height: 4px;
           cursor: ns-resize;
-          margin-top: -4px;
           border-radius: 4px;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+        }
+
+        .setting {
+          position: absolute;
+          top: 0;
+          right: 0px;
+          
+          .btn {
+            padding: 0;
+            line-height: 1em;
+            font-size: inherit;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, .1);
+            border: none;
+            outline: none;
+
+            &:focus {
+              outline: none;
+              box-shadow: none;
+            }
+          }
+
+          .dropdown-menu {
+            padding: 0;
+            margin: 0;
+
+            .b-dropdown-form {
+              font-size: .8em;
+              padding: .5em .7em;
+              padding-bottom: 0;
+
+              .custom-control-label {
+                &::before,
+                &::after {
+                  top: .1em;
+                }
+              }
+
+              .color-group>div {
+                display: flex;
+                flex-wrap: wrap;
+
+                .color {
+                  width: 20%;
+                  padding: 0;
+
+                  padding-top: 20%;
+
+                  margin: 0;
+                  left: 0;
+                  top: 0;
+
+                  background-image: none;
+                  border: none;
+                  border-radius: 0;
+                  outline: none;
+                  background-color: currentColor;
+                }
+
+                .color[data-checked] {
+                  transform: scale(1.2, 1.2);
+                  box-shadow: 0 0 .2em rgba(0, 0, 0, .5);
+                }
+              }
+
+              .form-group {
+                margin-bottom: 5px;
+              }
+            }
+          }
         }
       }
     }
