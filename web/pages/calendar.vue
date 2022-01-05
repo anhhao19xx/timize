@@ -1,26 +1,44 @@
 <template>
-  <div class="calendar">
-    <Piece v-model="currentPiece"/>
+  <div class="container-fluid">
+    <b-row>
+      <b-col class="p-0">
+        <div class="calendar">
+          <Piece v-model="currentPiece"/>
 
-    <div class="column time-column">
-      <div class="cell date-cell"></div>
-      <div class="cell" v-for="hour in hours" :key="`root-${hour}`">
-        <div class="hour-label">{{ `${hour}:00` }}</div>
-      </div>
-    </div>
-    
-    <div v-for="day in getWeek()" :key="day.toString()" class="column">
-      <div class="cell date-cell">
-        <div class="dow">{{ getDayOfWeek(day) }} </div>
-        <div class="date">{{ formatDate(day) }}</div>
-      </div>
-      <div class="wrapper">
-        <div class="cell" v-for="hour in hours" :key="`${day}-${hour}`"></div>
-        <div class="event" v-for="event in getEventFromTask(day)" :key="event.task.id" :style="generateEventStyle(event).style" @click="selectPiece(event.task.piece)">
-          <div class="content" :style="generateEventStyle(event).contentStyle">{{ event.task.todo }}</div>
+          <div class="column time-column">
+            <div class="cell date-cell"></div>
+            <div class="cell" v-for="hour in hours" :key="`root-${hour}`">
+              <div class="hour-label">{{ `${hour}:00` }}</div>
+            </div>
+          </div>
+          
+          <div v-for="day in getWeek()" :key="day.toString()" class="column">
+            <div class="cell date-cell">
+              <div class="dow">{{ getDayOfWeek(day) }} </div>
+              <div class="date">{{ formatDate(day) }}</div>
+            </div>
+            <hour-column
+              :value="days[day]"
+              @updateEvent="updateEvent"
+            ></hour-column>
+          </div>
         </div>
-      </div>
-    </div>
+      </b-col>
+
+      <b-col cols="3">
+        <div class="m-panel mt-3">
+          <h5>Unschedule Tasks</h5>
+
+          <b-list-group>
+            <b-list-group-item
+              v-for="task in unscheduleTasks"
+              :key="task.id"
+              v-html="task.todo"
+            ></b-list-group-item>
+          </b-list-group>
+        </div>
+      </b-col>
+    </b-row>
   </div>
 </template>
 
@@ -29,14 +47,22 @@ import moment from 'moment';
 import { mapState } from 'vuex';
 import Piece from '../comps/Piece.vue';
 import { COLORS } from '../plugins/constants.js';
+import HourColumn from '../comps/HourColumn.vue';
 
 export default {
-  components: { Piece },
+  components: { Piece, HourColumn },
 
   data(){
     return {
       data: [],
+      days: {},
+
       currentPiece: null,
+      eventResize: {
+        event: null,
+        y: 0,
+        offsetHeight: 0
+      }
     }
   },
   
@@ -48,7 +74,20 @@ export default {
       for (let i = 0; i < 24; i++)
         ls.push(i);
       return ls;
-    }
+    },
+
+    unscheduleTasks() {
+      const list = [];
+
+      for (let task of this.data){
+        if (!task.startAt || !task.endAt){
+          list.push(task);
+          continue;
+        }
+      }
+
+      return list;
+    },
   },
 
   methods: {
@@ -71,13 +110,11 @@ export default {
 
     async syncData(){
       this.data = await this.$db.list('tasks', { $limit: -1 });
-    },
 
-    mapColor(color){
-      if (COLORS[color])
-        return COLORS[color];
-
-      return color;
+      this.days = {};
+      for (let d of this.getWeek()){
+        this.$set(this.days, d, this.getEventFromTask(d));
+      }
     },
 
     getEventFromTask(d){
@@ -118,39 +155,44 @@ export default {
         for (let item of overlaps)
           item.maxLevel = maxLevel;
 
-        // return
-          
-        ls.push({
+        let event = {
           startAtHour,
           endAtHour,
+          offsetHour: 0,
           level,
           maxLevel,
           task
-        });
+        };
+          
+        ls.push(event);
       }
 
       return ls;
     },
 
-    generateEventStyle({ startAtHour, endAtHour, task, level, maxLevel }){
-
-      return {
-        style: {
-          top: `${startAtHour/24*100}%`,
-          height: `${(endAtHour - startAtHour)/24*100}%`,
-          width: `${100/maxLevel}%`,
-          left: `${100/maxLevel * ( level - 1)}%`
-        },
-        contentStyle: {
-          'background-color': this.mapColor(task.color) || COLORS['grey'],
-          opacity: task.done ? 0.5 : 1
-        }
-      }
-    },
-
     selectPiece(id){
       this.currentPiece = id;
     },
+
+    updateDateHour(curDate, numberHour){
+      const hour = Math.floor(numberHour);
+      const minute = Math.floor(numberHour % 1 * 60);
+
+      const d = moment(curDate);
+      d.set('hour', hour);
+      d.set('minute', minute);
+
+      return d.toDate();
+    },
+
+    updateEvent(event){
+      const { endAtHour } = event;
+      const endAt = this.updateDateHour(event.task.endAt, endAtHour);
+      event.task.endAt = endAt.toString();
+
+      this.$utils.updateTask(event.task);
+      
+    }
   },
 
   async mounted(){
@@ -165,6 +207,13 @@ export default {
     async currentPiece(){
       if (this.currentPiece === null)
         await this.syncData();
+    },
+
+    days: {
+      deep: true,
+      handler(){
+        console.log(this.days);
+      }
     }
   }
 }
@@ -176,23 +225,25 @@ $cell-height: 50px;
 $date-cell-height: 60px;
 
 .calendar {
-  margin: 1em;
+  margin: 1em 0 1em 1em;
   border-left: $border;
+  border-bottom: $border;
   display: flex;
   background-color: var(--secondary-bg);
 
   .column {
     position: relative;
     width: calc(14.285% - 7.1429px);
+    border-right: $border;
     
     .cell {
       height: $cell-height;
-      border-right: $border;
-      border-bottom: $border;      
       position: relative;
 
       &.date-cell {
         border-top: $border;
+        border-bottom: $border;
+
         text-align: center;
         height: $date-cell-height;
         padding: .5em;
@@ -231,21 +282,6 @@ $date-cell-height: 60px;
       position: relative;
       overflow: hidden;
 
-      .event {
-        position: absolute;
-        font-size: .8em;
-        border-right: 1px solid var(--secondary-bg);
-        border-bottom: 1px solid var(--secondary-bg);
-        overflow: hidden;
-        
-        .content {
-          color: white;
-          width: 100%;
-          height: 100%;
-          padding: .2em .4em;
-          border-radius: 4px;
-        }
-      }
     }
   }
 }

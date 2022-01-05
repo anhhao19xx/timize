@@ -5,11 +5,17 @@ import md from './md';
 import db from './db';
 import createHttpPlugin from './http';
 import createApiPlugin from './api';
+import { COLORS } from './constants';
+import { makeTimeRangeTag } from './quill';
 
 const R_DATE = /^[0-9]{4}[0-1][0-9][0-3][0-9]$/;
 const R_TIMERANGE = /^([0-2]*[0-9]:[0-5]*[0-9])-([0-2]*[0-9]:[0-5]*[0-9])/;
 const R_COLOR = /^(red|green|blue|pink|purple|indigo|cyan|teal|lime|yellow|amber|orange|brown|grey)/;
 const R_LOCAL_LINK = /^\#\/\?id\=(.*)$/;
+
+const replaceContent = 
+  (content, index, length, dst) => 
+    content.slice(0, index) + dst + content.slice(index + length);
 
 function extract(content, r, resPath){
   let res;
@@ -26,9 +32,64 @@ function extract(content, r, resPath){
 
 function stripHtml(html)
 {
-   let tmp = document.createElement("DIV");
-   tmp.innerHTML = html;
-   return tmp.textContent || tmp.innerText || "";
+  let tmp = document.createElement("DIV");
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || "";
+}
+
+function forEachTask(content, fn){
+  let index = 0;
+  let rawTaskGroups = extract(content, /<ul data-checked="(.*?)">(.*?)<\/ul>/gm);
+  for (let rawTaskGroup of rawTaskGroups){
+    let rawTasks = extract(rawTaskGroup[2], /<li>(.*?)<\/li>/gm);
+    let newGroupContent = '';
+
+    for (let rawTask of rawTasks){       
+      let task = {
+        raw: rawTask[1],
+        todo: rawTask[1],
+        done: rawTaskGroup[1] === 'true',
+        index: index++
+      }
+
+      let timeRangeRegex = /<span class="timerange" data-value="(.*?)">(.*?)<\/span>/g;
+      let rawTimeRange = extract(task.raw, timeRangeRegex)[0];
+
+      if (rawTimeRange){
+        task.todo = stripHtml(task.raw.replace(timeRangeRegex, '')).trim();
+        let timeRange = JSON.parse(stripHtml(rawTimeRange[1]));
+        task.startAt = moment(timeRange.from).toDate().toString();
+        task.endAt = moment(timeRange.to).toDate().toString();
+        task.color = timeRange.color || 'grey';
+      }
+
+      task = fn(task) || task;
+
+      if (task.startAt){
+        let from = moment(task.startAt);
+        let to = moment(task.endAt);
+
+        let dataValue = {
+          from: from.format('YYYY/MM/DD HH:mm:ss'),
+          to: to.format('YYYY/MM/DD HH:mm:ss'),
+          color: task.color
+        };
+
+        let node = document.createElement('span');
+        node.className = 'timerange';
+
+        makeTimeRangeTag(node, JSON.stringify(dataValue));
+
+        task.raw = `${node.outerHTML} ${task.todo}`;
+      }
+
+      newGroupContent += `<ul data-checked="${task.done}"><li>${task.raw}</li></ul>`;
+    }
+
+    content = replaceContent(content, rawTaskGroup.index, rawTaskGroup[0].length, newGroupContent);
+  }
+
+  return content;
 }
 
 export default ({ app }, inject) => {
@@ -42,33 +103,11 @@ export default ({ app }, inject) => {
 
       // extract tasks
       const tasks = [];
-      let index = 0;
-      let rawTaskGroups = extract(content, /<ul data-checked="(.*?)">(.*?)<\/ul>/gm);
-      for (let rawTaskGroup of rawTaskGroups){
-        let rawTasks = extract(rawTaskGroup[2], /<li>(.*?)<\/li>/gm);
-        for (let rawTask of rawTasks){       
-          let task = {
-            piece: piece.id,
-            todo: rawTask[1],
-            done: rawTaskGroup[1] === 'true',
-            index: index++,
-            createdAt: piece.createdAt.toString()
-          }
-
-          let rawTimeRange = extract(rawTask[1], /<span class="timerange" data-value="(.*?)">(.*?)<\/span>/g)[0];
-
-          if (rawTimeRange){
-            task.todo = task.todo.split(rawTimeRange[0]).join('');
-            let timeRange = JSON.parse(stripHtml(rawTimeRange[1]));
-            task.startAt = moment(timeRange.from).toDate().toString();
-            task.endAt = moment(timeRange.to).toDate().toString();
-            task.color = timeRange.color || 'grey';
-          }
-
-          task.todo = stripHtml(task.todo).trim();
-          tasks.push(task);
-        }
-      }
+      content = forEachTask(content, task => {
+        task.piece = piece.id,
+        task.createdAt = piece.createdAt.toString();
+        tasks.push(task);
+      });
 
       await db.removeWhere('tasks', { piece: piece.id });
       if (tasks.length)
@@ -81,6 +120,19 @@ export default ({ app }, inject) => {
       });
 
       return true;
+    },
+
+    async updateTask(task){
+      const piece = await db.get('pieces', task.piece);
+
+      const content = forEachTask(piece.content, oldTask => {
+        if (oldTask.index !== task.index)
+          return oldTask;
+
+        return task;
+      });
+
+      await this.updatePieceContent(piece, content);
     },
 
     isEquals(val1, val2){

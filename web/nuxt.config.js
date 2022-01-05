@@ -6,9 +6,9 @@ module.exports = {
     mode: 'hash'
   },
   plugins: [
+    { src: '~/plugins/quill.js' },
     { src: '~/plugins/index.js' },
     { src: '~/plugins/clipboard.js' },
-    { src: '~/plugins/quill.js' },
   ],
   publicRuntimeConfig: {
     apiUrl: mode === 'production' ? 'https://timize.anhhao.me' : 'http://localhost:3001/timize'

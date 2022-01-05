@@ -43,6 +43,7 @@
     li {
       padding-left: 0 !important;
       list-style-type: none;
+      vertical-align: middle;
 
       &:before {
         margin-left: 0 !important;
@@ -72,7 +73,7 @@
     content: ' ';
     height: 1.5em;
     background-size: 1.1em 1.1em;
-    vertical-align: top;
+    vertical-align: middle;
     background-repeat: no-repeat;
     background-position: center center;
   }
@@ -96,17 +97,16 @@
   }
 
   .timerange {
-    span {
+    span[style] {
       padding: 0 .5em;
       color: white;
-      font-size: .8em;
+      font-size: .7em;
       font-weight: bold;
       border-radius: .5em;
       box-sizing: border-box;
       display: inline-block;
-      margin: 0 -.3em;
-      height: 2em;
-      line-height: 2.25em;
+      height: 1.7em;
+      line-height: 1.8em;
     }
   }
 }

@@ -26,17 +26,25 @@ icons['hashtag'] = '<svg xmlns="http://www.w3.org/2000/svg" class="ionicon" view
 Quill.register(HashTag);
 
 // time
+export function makeTimeRangeTag(node, raw){
+  node.setAttribute("data-value", raw);
+
+  const data = JSON.parse(raw);
+
+  const fromDate = moment(data.from).format('YYYY/MM/DD');
+  const toDate = moment(data.to).format('YYYY/MM/DD');
+
+  node.innerHTML = `<span title="${fromDate === toDate ? fromDate : (fromDate + '-' + toDate)}" style="background-color: ${COLORS[data.color || 'grey']}">${moment(data.from).format('HH:mm')}-${moment(data.to).format('HH:mm')}</span>`;
+
+  return node;
+}
+
 class TimeRange extends Embed {
   static create(raw) {
 		const node = super.create(raw);
-    node.setAttribute("data-value", raw);
+    
+    makeTimeRangeTag(node, raw);
 
-    const data = JSON.parse(raw);
-
-    const fromDate = moment(data.from).format('YYYY/MM/DD');
-    const toDate = moment(data.to).format('YYYY/MM/DD');
-
-    node.innerHTML = `<span title="${fromDate === toDate ? fromDate : (fromDate + '-' + toDate)}" style="background-color: ${COLORS[data.color || 'grey']}">${moment(data.from).format('HH:mm')}-${moment(data.to).format('HH:mm')}</span>`;
     return node;
   }
 
