@@ -206,7 +206,7 @@ export default {
     copyPiece(piece){
       const container = this.$refs.container;
       this.copyToClipboard(`<a href="#/?id=${piece.id}">${piece.title}</a>`);
-      this.pushNotice({ type: 'success', text: 'Copied'});
+      this.$noti('success', 'Copied');
     },
 
     sharePiece(piece){
