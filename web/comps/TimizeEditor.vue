@@ -51,7 +51,7 @@ export default {
             ['bold', 'italic', 'underline', 'strike'], 
             [{ header: 1 }, { header: 2 }],
             [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
-            ['timerange']
+            ['link']
           ]
         }
       }

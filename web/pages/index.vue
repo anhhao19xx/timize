@@ -176,15 +176,36 @@ export default {
 
     handleSelectPiece(e, piece){
       if (['A', 'LABEL', 'INPUT', 'BUTTON'].indexOf(e.target.tagName) !== -1){
+        e.preventDefault();
+
+        if (e.target.tagName !== 'A')
+          return;
+
+        const res = /#\/\?id\=(.*?)$/g.exec(e.target.href);
+        if (!res)
+          return;
+
+        this.currentPiece = parseInt(res[1]);
         return;
       }
 
       this.selectPiece(piece);
     },
 
+    copyToClipboard(str){
+      function listener(e) {
+        e.clipboardData.setData("text/html", str);
+        e.clipboardData.setData("text/plain", str);
+        e.preventDefault();
+      }
+      document.addEventListener("copy", listener);
+      document.execCommand("copy");
+      document.removeEventListener("copy", listener);
+    },
+
     copyPiece(piece){
       const container = this.$refs.container;
-      this.$copyText(`[${piece.title}](#/?id=${piece.id})`, container);
+      this.copyToClipboard(`<a href="#/?id=${piece.id}">${piece.title}</a>`);
       this.pushNotice({ type: 'success', text: 'Copied'});
     },
 
@@ -310,6 +331,10 @@ export default {
           display: block;
           margin: .5em;
           font-size: .8em;
+
+          * {
+            pointer-events: none;
+          }
         }
       }
     } 

@@ -3,7 +3,12 @@
     <label class="bg" @click="close"></label>
     <div class="wrapper">
       <div class="editor-wrapper">
-        <TimizeEditor v-model="content" @input="onInput" @route="doRoute"></TimizeEditor>
+        <TimizeEditor 
+          v-model="content" 
+          @input="onInput" 
+          @route="doRoute"
+          @click.native="doClick"
+        ></TimizeEditor>
       </div>
       <div class="bottom-bar">
         <div class="status">
@@ -100,9 +105,7 @@ export default {
     },
 
     async close(){
-      if (await this.update())
-        this.pushNotice({ text: 'Updated', type: 'success' });
-
+      await this.update()
       this.$emit('input', null);
     },
 
@@ -111,6 +114,20 @@ export default {
       if (route.query.id){
         this.$emit('input', parseInt(route.query.id));
       }
+    },
+
+    async doClick(e){
+      if (e.target.tagName !== 'A')
+        return;
+
+      const res = /#\/\?id\=(.*?)$/g.exec(e.target.href);
+      if (!res)
+        return;
+
+      e.preventDefault();
+
+      await this.update();
+      this.$emit('input', parseInt(res[1]));
     }
   },
   
