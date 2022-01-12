@@ -1,86 +1,92 @@
 <template>
-  <div class="tm-calendar">
-    <div class="label-row">
-      <div class="gap-cell"></div>
-      <div v-for="day in dateRange" :key="day.toString()" class="cell">
-        <div class="dow">{{ getDayOfWeek(day) }} </div>
-        <div class="date">{{ formatDate(day) }}</div>
-      </div>
-    </div>
-
-    <div class="wrapper">
-      <div class="time-column">
-        <div class="column-label"></div>
-        <div 
-          class="cell" 
-          v-for="hour in hours" 
-          :key="`root-${hour}`" 
-          :style="{ height: `${HOUR_HEIGHT}px`}"
-        >
-          <div class="hour-label">{{ `${hour}:00` }}</div>
+  <div>  
+    <div class="tm-calendar">
+      <div class="label-row">
+        <div class="gap-cell"></div>
+        <div v-for="day in dateRange" :key="day.toString()" class="cell">
+          <div class="dow">{{ getDayOfWeek(day) }} </div>
+          <div class="date">{{ formatDate(day) }}</div>
         </div>
       </div>
 
-      <div 
-        class="main" 
-        ref="main"
-        @drop="dropTask($event)"
-        @dragover="allowDropTask($event)"
-      >
-        <div v-for="date in dateRange" :key="`date-${date}`" class="column">
+      <div class="wrapper">
+        <div class="time-column">
+          <div class="column-label"></div>
           <div 
             class="cell" 
             v-for="hour in hours" 
-            :key="`hour-${hour}`"
+            :key="`root-${hour}`" 
             :style="{ height: `${HOUR_HEIGHT}px`}"
-          ></div>
-        </div>
-        <div 
-          class="fragment"
-          v-for="fragment in fragments" 
-          :key="`fragment-${fragment.id}`"
-          :style="fragment.style.main" 
-        >
-          <div 
-            :class="`content`"
-            :style="fragment.style.content"
-            @mousedown="startFragmentAction('move', $event, fragment)"
-            @click="showTaskInfo(fragment)"
           >
-            {{ fragment.task.todo }}
+            <div class="hour-label">{{ `${hour}:00` }}</div>
           </div>
+        </div>
 
-          <b-dropdown class="setting">
-            <b-dropdown-form>
-              <b-form-group>
-                <b-checkbox @input="updateTask(fragment, 'done', $event)" :checked="fragment.task.done">Done</b-checkbox>
-              </b-form-group>
-              <b-form-group class="color-group">
-                <b-button
-                  class="color"
-                  :data-checked="fragment.task.color === name"
-                  v-for="(color, name) in COLORS" 
-                  :style="{ color: color }"
-                  :key="`color-${name}`"
-                  @click="updateTask(fragment, 'color', name)"
-                ></b-button>
-              </b-form-group>
-            </b-dropdown-form>
-          </b-dropdown>
+        <div 
+          class="main" 
+          ref="main"
+          @drop="dropTask($event)"
+          @dragover="allowDropTask($event)"
+        >
+          <div v-for="date in dateRange" :key="`date-${date}`" class="column">
+            <div 
+              class="cell" 
+              v-for="hour in hours" 
+              :key="`hour-${hour}`"
+              :style="{ height: `${HOUR_HEIGHT}px`}"
+            ></div>
+          </div>
+          <div 
+            class="fragment"
+            v-for="fragment in fragments" 
+            :key="`fragment-${fragment.id}`"
+            :style="fragment.style.main" 
+          >
+            <div 
+              :class="`content`"
+              :style="fragment.style.content"
+              @mousedown="startFragmentAction('move', $event, fragment)"
+              @click="showTaskInfo(fragment)"
+            >
+              {{ fragment.task.todo }}
+            </div>
 
-          <!-- <b-checkbox class="check"></b-checkbox> -->
+            <b-dropdown class="setting">
+              <b-dropdown-form>
+                <b-form-group>
+                  <b-checkbox @input="updateTask(fragment, 'done', $event)" :checked="fragment.task.done">Done</b-checkbox>
+                </b-form-group>
+                <b-form-group class="color-group">
+                  <b-button
+                    class="color"
+                    :data-checked="fragment.task.color === name"
+                    v-for="(color, name) in COLORS" 
+                    :style="{ color: color }"
+                    :key="`color-${name}`"
+                    @click="updateTask(fragment, 'color', name)"
+                  ></b-button>
+                </b-form-group>
+              </b-dropdown-form>
+            </b-dropdown>
 
-          <div class="resize" @mousedown="startFragmentAction('resize', $event, fragment)"></div>
+            <!-- <b-checkbox class="check"></b-checkbox> -->
+
+            <div class="resize" @mousedown="startFragmentAction('resize', $event, fragment)"></div>
+          </div>
         </div>
       </div>
     </div>
+
+    <Piece v-model="currentPiece"/>
   </div>
 </template>
 
 <script>
 import moment from 'moment';
+import { mapMutations } from 'vuex';
 
 import { COLORS } from '../plugins/constants.js';
+import Piece from './Piece.vue';
 
 const MIN_CELL_WIDTH = 120;
 const HOUR_HEIGHT = 50;
@@ -88,6 +94,10 @@ const MIN_TIME_RANGE = 30;
 
 export default {
   props: ['value', 'startAt', 'numberDay'],
+
+  components: {
+    Piece
+  },
 
   data(){
     return {
@@ -99,6 +109,8 @@ export default {
       currentFragmentId: 0,
       fragments: [],
       unscheduleTasks: [],
+
+      currentPiece: null,
 
       action: {
         type: '',
@@ -135,6 +147,8 @@ export default {
   },
 
   methods: {
+    ...mapMutations(['incDataVer']),
+    
     resize(){
       if (!this.$refs.main)
         return;
@@ -399,7 +413,7 @@ export default {
     },
 
     showTaskInfo(fragment){
-      console.log(fragment);
+      this.currentPiece = fragment.task.piece;
     },
 
     updateTask(fragment, name, value){
@@ -444,6 +458,13 @@ export default {
       handler(){
         this.load();
       }
+    },
+
+    currentPiece(){
+      if (this.currentPiece !== null)
+        return;
+
+      this.incDataVer();
     }
   }
 }
