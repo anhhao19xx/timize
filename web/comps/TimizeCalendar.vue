@@ -225,9 +225,15 @@ export default {
           continue;
         }
 
-        if (moment(task.startAt).diff(this.localStartAt, 'days') >= this.localNumberDay){
+        let diffDays = moment(task.startAt).diff(this.localStartAt, 'days');
+
+        if (diffDays >= this.localNumberDay){
           continue;
         };
+
+        if (moment(task.endAt).isBefore(this.localStartAt)){
+          continue;
+        }
 
         while (taskStartAt.isBefore(taskEndAt, 'day')){
           this.fragments.push({
