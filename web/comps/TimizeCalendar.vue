@@ -1,5 +1,13 @@
 <template>
-  <div>  
+  <div> 
+    <div class="d-flex mb-3 justify-content-between">
+      <small>YEAR: {{ currentYear }}</small>
+      <div>
+        <b-button size="sm" @click="jumpStartAt(-1)">Prev</b-button>
+        <b-button size="sm" @click="jumpStartAt(1)">Next</b-button>
+      </div>
+    </div>
+
     <div class="tm-calendar">
       <div class="label-row">
         <div class="gap-cell"></div>
@@ -143,11 +151,20 @@ export default {
       for (let i = 0; i < 24; i++)
         ls.push(i);
       return ls;
+    },
+
+    currentYear(){
+      return moment(this.localStartAt).format('YYYY');
     }
   },
 
   methods: {
     ...mapMutations(['incDataVer']),
+
+    jumpStartAt(vector){
+      this.localStartAt = moment(this.localStartAt).add(this.localNumberDay * vector, 'days');
+      this.init();
+    },
     
     resize(){
       if (!this.$refs.main)
@@ -212,7 +229,6 @@ export default {
     init(){
       console.log('Init');
       
-      this.localStartAt = moment(this.startAt || new Date());
       this.unscheduleTasks = [];
       this.fragments = [];
 
@@ -313,6 +329,8 @@ export default {
         return;
 
       this.localValue = JSON.parse(strValue);
+      this.localStartAt = moment(this.startAt || new Date());
+      
       this.$nextTick(() => {
         this.resize();
         this.init();
@@ -471,6 +489,9 @@ export default {
         return;
 
       this.incDataVer();
+    },
+    startAt(){
+      this.init();
     }
   }
 }

@@ -177,11 +177,11 @@ export default {
 
   async mounted(){
     // apikey
-    this.loadApiKey();
-    await this.loadData();
+    // this.loadApiKey();
+    // await this.loadData();
 
-    if (this.apikey)
-      this.formApiKey = this.apikey;
+    // if (this.apikey)
+    //   this.formApiKey = this.apikey;
 
     // theme
     this.$nextTick(() => {

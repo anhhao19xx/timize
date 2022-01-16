@@ -51,7 +51,9 @@ export default {
         event: null,
         y: 0,
         offsetHeight: 0
-      }
+      },
+
+      startAt: moment().day(0).set({ hour: 0, minute: 0, second: 0 }).toDate()
     }
   },
   
@@ -69,14 +71,14 @@ export default {
       }
 
       return list;
-    },
-
-    startAt(){
-      return moment().day(0).set({ hour: 0, minute: 0, second: 0 }).toDate();
     }
   },
 
   methods: {
+    formatDate(d){
+      return moment(d).format('YYYY')
+    },
+
     async syncData(){
       console.log('Sync data');
       this.data = await this.$db.list('tasks', { $limit: -1 });
