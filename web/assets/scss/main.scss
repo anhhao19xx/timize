@@ -34,6 +34,26 @@ $secondary: #646464;
   --border: #212121;
 }
 
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
 body {
   background-color: var(--primary-bg);
   color: var(--primary);

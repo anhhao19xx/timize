@@ -1,55 +1,60 @@
 <template>
   <div class="timeline" ref="container">
-    <div class="piece-group">
-      <h4>Top</h4>
-      <div v-if="top" class="piece top" @click="handleSelectPiece($event, top)">
-        <!-- <div class="top-bar">
-          <b-button @click="selectPiece(top)" variant="outline-primary" size="sm">
-            <i class="icon icon-pencil"></i>
-          </b-button>
-        </div> -->
-        <MdViewer 
-          class="content" 
-          :value="top.content" 
-          @change="updatePieceContent(top, $event)"
-          @route="doRoute"
-        ></MdViewer>
-      </div>
-    </div>
+    <b-row>    
+      <b-col cols="9 main">
+        <b-button variant="primary" class="add-piece" @click="addPiece"><big>+</big></b-button>
 
-    <b-button variant="primary" class="add-piece" @click="addPiece"><big>+</big></b-button>
+        <div v-for="item in dataGroupByDate" :key="item.groupValue" class="piece-group">
+          <DateFormat :date="item.groupValue"></DateFormat>
 
-    <div v-for="item in dataGroupByDate" :key="item.groupValue" class="piece-group">
-      <DateFormat :date="item.groupValue"></DateFormat>
-
-      <div v-for="piece in item.list" :key="piece.id" class="piece" @click="handleSelectPiece($event, piece)">
-        <div class="time">{{ formatTime(piece.createdAt) }}</div>
-        <div class="top-bar">
-          <!-- <b-button @click="selectPiece(piece)" variant="outline-primary" size="sm">
-            <i class="icon icon-pencil"></i>
-          </b-button> -->
-          <b-button @click="copyPiece(piece)" variant="outline-primary" size="sm">
-            <i class="icon icon-link"></i>
-          </b-button>
-          <b-button @click="sharePiece(piece)" variant="outline-primary" size="sm">
-            <i class="icon icon-share"></i>
-          </b-button>
-          <b-button @click="removePiece(piece)" variant="outline-danger" size="sm">
-            <i class="icon icon-trash"></i>
-          </b-button>
+          <div v-for="piece in item.list" :key="piece.id" class="piece" @click="handleSelectPiece($event, piece)">
+            <div class="time">{{ formatTime(piece.createdAt) }}</div>
+            <div class="top-bar">
+              <!-- <b-button @click="selectPiece(piece)" variant="outline-primary" size="sm">
+                <i class="icon icon-pencil"></i>
+              </b-button> -->
+              <b-button @click="copyPiece(piece)" variant="outline-primary" size="sm">
+                <i class="icon icon-link"></i>
+              </b-button>
+              <b-button @click="sharePiece(piece)" variant="outline-primary" size="sm">
+                <i class="icon icon-share"></i>
+              </b-button>
+              <b-button @click="removePiece(piece)" variant="outline-danger" size="sm">
+                <i class="icon icon-trash"></i>
+              </b-button>
+            </div>
+            <MdViewer 
+              class="content" 
+              :value="piece.content" 
+              @change="updatePieceContent(piece, $event)"
+              @route="doRoute"
+            ></MdViewer>
+          </div>
         </div>
-        <MdViewer 
-          class="content" 
-          :value="piece.content" 
-          @change="updatePieceContent(piece, $event)"
-          @route="doRoute"
-        ></MdViewer>
-      </div>
-    </div>
 
-    <div class="text-center pb-5">
-      <b-button variant="outline-primary" v-if="isMore" @click="loadMore">More</b-button>
-    </div>
+        <div class="text-center pb-5">
+          <b-button variant="outline-primary" v-if="isMore" @click="loadMore">More</b-button>
+        </div>
+      </b-col>
+
+      <b-col cols="3" class="pr-0">
+        <div class="piece-group top">
+          <div v-if="top" class="piece" @click="handleSelectPiece($event, top)">
+            <!-- <div class="top-bar">
+              <b-button @click="selectPiece(top)" variant="outline-primary" size="sm">
+                <i class="icon icon-pencil"></i>
+              </b-button>
+            </div> -->
+            <MdViewer 
+              class="content" 
+              :value="top.content" 
+              @change="updatePieceContent(top, $event)"
+              @route="doRoute"
+            ></MdViewer>
+          </div>
+        </div>
+      </b-col>
+    </b-row>
 
     <Piece v-model="currentPiece"/>
   </div>
@@ -249,6 +254,13 @@ export default {
 .timeline {
   padding-left: 6em;
   padding-right: 1em;
+  height: calc(100vh - 50px);
+  overflow: hidden;
+
+  .main {
+    height: calc(100vh - 50px);
+    overflow-y: auto;
+  }
 
   .add-piece {
     width: 40px;
@@ -303,6 +315,23 @@ export default {
       }
     } 
 
+    &.top {
+      position: sticky;
+      top: 50px;
+      margin-top: 0;
+      padding-top: 0;
+      height: calc(100vh - 50px);
+
+      .piece {
+        margin: 0;
+        border-radius: 0;
+        border-top: none;
+        border-bottom: none;
+        border-right: none;
+        height: 100%;
+        overflow-y: auto;
+      }
+    }
   }
 }
 </style>
