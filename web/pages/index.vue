@@ -1,5 +1,5 @@
 <template>
-  <div class="timeline" ref="container">
+  <div class="timeline container-fluid" ref="container">
     <b-row>    
       <b-col cols="9 main">
         <b-button variant="primary" class="add-piece" @click="addPiece"><big>+</big></b-button>
@@ -250,16 +250,15 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .timeline {
-  padding-left: 6em;
-  padding-right: 1em;
   height: calc(100vh - 50px);
-  overflow: hidden;
+  overflow-y: hidden;
 
   .main {
     height: calc(100vh - 50px);
     overflow-y: auto;
+    padding-left: 4em;
   }
 
   .add-piece {
