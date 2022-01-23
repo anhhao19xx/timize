@@ -1,33 +1,8 @@
-.md-content {
-  .task-list {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 1rem;
-    margin-left: 1rem;
-
-    input[type="checkbox"], label {
-      display: inline;
-      margin-bottom: 0;
-    }
-
-    input[type="checkbox"] {
-      margin-right: 1rem;
-    }
-
-    input[type="checkbox"]:checked~label {
-      text-decoration: line-through;
-    }
-  }
-
+.md-content, 
+.tm-editor {
   a {
     text-decoration: underline;
     color: #1976D2;
-  }
-
-  a.hash {
-    color: #D81B60;
-    font-weight: bold;
-    text-decoration: none;
   }
 
   a.hash:hover {
@@ -45,10 +20,6 @@
     margin-top: 1em;
     margin-bottom: .5em;
     letter-spacing: -.025em;
-  }
-
-  h1:first-child {
-    margin-top: 0;
   }
 
   h2 {
@@ -69,11 +40,17 @@
     letter-spacing: -.025em;
   }
 
-  table.table th[align="right"] {
-    text-align: right;
+  h1:first-child,
+  h2:first-child,
+  h3:first-child {
+    margin-top: 0;
   }
 
   img {
     max-width: 100%;
+  }
+
+  p {
+    margin: .5em 0;
   }
 }
