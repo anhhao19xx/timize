@@ -5,39 +5,23 @@
     color: #1976D2;
   }
 
-  a.hash:hover {
-    text-decoration: underline;
-  }
-
-  a.hash:before {
-    content: '#';
+  h1, h2, h3, h4, h5, h6 {
+    margin-bottom: 0.5rem;
   }
 
   h1 {
-    font-size: 2rem;
-    font-weight: 600;
-    line-height: 1.375;
-    margin-top: 1em;
-    margin-bottom: .5em;
-    letter-spacing: -.025em;
+    margin-top: 40px;
+    font-size: 2em;
   }
 
   h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    line-height: 1.375;
-    margin-top: 1.25em;
-    margin-bottom: .5em;
-    letter-spacing: -.025em;
+    margin-top: 20px;
+    font-size: 1.25em;
   }
 
   h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    line-height: 1.375;
-    margin-top: 1.25em;
-    margin-bottom: .5em;
-    letter-spacing: -.025em;
+    margin-top: 10px;
+    font-size: 1em;
   }
 
   h1:first-child,
@@ -46,11 +30,7 @@
     margin-top: 0;
   }
 
-  img {
-    max-width: 100%;
-  }
-
   p {
-    margin: .5em 0;
+    margin-bottom: 1rem;
   }
 }

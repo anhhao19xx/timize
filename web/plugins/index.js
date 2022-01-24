@@ -36,101 +36,14 @@ export default ({ app }, inject) => {
 
   inject('utils', {
     async updatePieceContent(piece, content){
-      const tokens = md.lexer(content);
-      let currentDate = null;
-
-      const rawLinks = extract(tokens, ['link'])
-      const headings = extract(tokens, ['heading'])
-      const hashesAndTaskItems = extract(tokens, ['hash', 'taskitem']);
-
       let title = '';
-      const tasks = [];
-      const links = [];
 
-      // local links
-      for (let link of rawLinks){
-        let res = R_LOCAL_LINK.exec(link.href);
-
-        if (!res)
-          continue;
-
-        links.push(parseInt(res[1]));
-      }
-
-      // heading
-      for (let heading of headings)
-        if (heading.depth === 1){
-          title = heading.text;
-          break;
-        }
-
-      // hash & taskitem
-      let index = 0;
-      for (let token of hashesAndTaskItems){
-        if (token.type === 'hash' && R_DATE.test(token.text))
-          currentDate = token.text;
-
-        if (token.type === 'taskitem'){
-          let todo = md.marked.Parser.parseInline(token.tokens);
-          let startAt, endAt, color;
-
-          if (token.meta){
-            let metaList = token.meta.split('|').filter(i => i);
-
-            for (let meta of metaList){
-              // time range meta
-              let metaRel = R_TIMERANGE.exec(meta);
-              if (metaRel){
-                startAt = metaRel[1];
-                endAt = metaRel[2];
-              }
-
-              // color
-              metaRel = R_COLOR.exec(meta);
-              if (metaRel){
-                color = metaRel[1];
-              }
-            }
-          }
-
-          let task = {
-            piece: piece.id,
-            todo,
-            done: token.checked,
-            index: index++,
-            createdAt: piece.createdAt.toString()
-          }
-
-          if (currentDate){
-            if (startAt){
-              task.startAt = moment(`${currentDate} ${startAt}:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
-            } else {
-              task.startAt = moment(`${currentDate} 00:00:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
-            }
-
-            if (endAt){
-              task.endAt = moment(`${currentDate} ${endAt}:00`, 'YYYYMMDD HH:mm:ss').toDate().toString();
-            }
-          }
-
-          if (color){
-            task.color = color;
-          }
-
-          tasks.push(task);
-        } 
-      }
-
-      await db.removeWhere('tasks', { piece: piece.id });
-
-      if (tasks.length)
-        await db.createMany('tasks', tasks);
+      console.log(content);
 
       await db.update('pieces', piece.id, { 
         title: title || piece.title, 
         content: content,
-        updatedAt: (new Date()).toString(),
-        links
+        updatedAt: (new Date()).toString()
       });
 
       return true;

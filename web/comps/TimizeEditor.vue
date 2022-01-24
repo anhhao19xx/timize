@@ -63,7 +63,8 @@ export default {
   },
 
   mounted() {
-   
+    this.content = '<h1>abc</h1><p>def</p><p>ghi</p><p>xyz</p><h2>ghi</h2><p>xxx</p>'; // this.value;
+    console.log('Init value', this.content);
   },
 
   watch: {
@@ -75,7 +76,8 @@ export default {
       if (this.value === this.content)
         return;
 
-      this.content = this.value;
+      this.content = '<h1>abc</h1><p>def</p><p>ghi</p><p>xyz</p><h2>ghi</h2><p>xxx</p>'; //this.value;
+      console.log('Init value', this.content);
     }
   }
 }
