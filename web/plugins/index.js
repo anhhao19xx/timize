@@ -38,8 +38,6 @@ export default ({ app }, inject) => {
     async updatePieceContent(piece, content){
       let title = '';
 
-      console.log(content);
-
       await db.update('pieces', piece.id, { 
         title: title || piece.title, 
         content: content,
