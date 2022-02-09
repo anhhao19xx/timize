@@ -1,33 +1,31 @@
 <template>
-  <div class="container-fluid">
-    <b-row>
-      <b-col class="pt-3">
-        <div class="m-panel">
-          <timize-calendar
-            :startAt="startAt"
-            :value="data"
-            @updateTask="updateTask"
-          />
-        </div>
-      </b-col>
+  <div class="p-4 w-9/12 pr-8">
+    <m-panel>
+      <timize-calendar
+        :startAt="startAt"
+        :value="data"
+        @updateTask="updateTask"
+      />
+    </m-panel>
 
-      <b-col cols="3">
-        <div class="m-panel mt-3">
-          <h5>Unschedule Tasks</h5>
+    <m-panel class="w-3/12 pr-0 fixed top-0 right-0 p-0 pt-12 h-screen border-l">
+      <div class="h-full p-4 overflow-auto">
+        <h3 class="mb-4">Unschedule Tasks</h3>
 
-          <b-list-group>
-            <b-list-group-item
-              v-for="task in unscheduleTasks"
-              :key="task.id"
-              v-html="task.todo"
-              button
-              draggable="true"
-              @dragstart="dragTask(task, $event)"
-            ></b-list-group-item>
-          </b-list-group>
-        </div>
-      </b-col>
-    </b-row>
+        <ul>
+          <li
+            class="p-2 border mb-2 rounded-md bg-white cursor-grab transition-all
+              hover:shadow hover:translate-y-[-.25rem]"
+            v-for="task in unscheduleTasks"
+            :key="task.id"
+            v-html="task.todo"
+            button
+            draggable="true"
+            @dragstart="dragTask(task, $event)"
+          ></li>
+        </ul>
+      </div>
+    </m-panel>
   </div>
 </template>
 

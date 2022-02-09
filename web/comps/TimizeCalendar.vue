@@ -1,57 +1,64 @@
 <template>
   <div> 
-    <div class="d-flex mb-3 justify-content-between">
+    <div class="flex mb-3 justify-between	">
       <small>YEAR: {{ currentYear }}</small>
       <div>
-        <b-button size="sm" @click="jumpStartAt(-1)">Prev</b-button>
-        <b-button size="sm" @click="jumpStartAt(1)">Next</b-button>
+        <button class="border py-1 px-2 text-sm rounded primary" @click="jumpStartAt(-1)">Prev</button>
+        <button class="border py-1 px-2 text-sm rounded primary" @click="jumpStartAt(1)">Next</button>
       </div>
     </div>
 
-    <div class="tm-calendar">
-      <div class="label-row">
-        <div class="gap-cell"></div>
-        <div v-for="day in dateRange" :key="day.toString()" class="cell">
-          <div class="dow">{{ getDayOfWeek(day) }} </div>
-          <div class="date">{{ formatDate(day) }}</div>
+    <div class="border border-t-0 border-l-0">
+      <div class="flex">
+        <div class="w-12 border border-r-0 border-b-0"></div>
+        <div
+          v-for="day in dateRange" 
+          :key="day.toString()" 
+          class="flex-1 border text-center py-2 border-r-0 border-b-0"
+        >
+          <div class="text-sm font-bold">{{ getDayOfWeek(day) }} </div>
+          <div class="text-sm">{{ formatDate(day) }}</div>
         </div>
       </div>
 
-      <div class="wrapper">
-        <div class="time-column">
-          <div class="column-label"></div>
+      <div class="flex">
+        <div class="time-column w-12">
           <div 
-            class="cell" 
+            class="border border-r-0 border-b-0" 
             v-for="hour in hours" 
             :key="`root-${hour}`" 
             :style="{ height: `${HOUR_HEIGHT}px`}"
           >
-            <div class="hour-label">{{ `${hour}:00` }}</div>
+            <div class="text-center text-xs bg-white mt-[-.5em]">{{ `${hour}:00` }}</div>
           </div>
         </div>
 
         <div 
-          class="main" 
+          class="flex-1 flex relative" 
           ref="main"
           @drop="dropTask($event)"
           @dragover="allowDropTask($event)"
         >
-          <div v-for="date in dateRange" :key="`date-${date}`" class="column">
+          <div 
+            v-for="date in dateRange" 
+            :key="`date-${date}`" 
+            class="flex-1"
+          >
             <div 
-              class="cell" 
+              class="border border-r-0 border-b-0" 
               v-for="hour in hours" 
               :key="`hour-${hour}`"
               :style="{ height: `${HOUR_HEIGHT}px`}"
             ></div>
           </div>
           <div 
-            class="fragment"
+            class="absolute border border-t-0 border-l-0 border-white"
             v-for="fragment in fragments" 
             :key="`fragment-${fragment.id}`"
             :style="fragment.style.main" 
           >
             <div 
-              :class="`content`"
+              class="rounded text-white text-sm py-0.5 px-1 h-full"
               :style="fragment.style.content"
               @mousedown="startFragmentAction('move', $event, fragment)"
               @click="showTaskInfo(fragment)"
@@ -59,27 +66,31 @@
               {{ fragment.task.todo }}
             </div>
 
-            <b-dropdown class="setting">
+            <!-- <b-dropdown class="setting">
               <b-dropdown-form>
                 <b-form-group>
                   <b-checkbox @input="updateTask(fragment, 'done', $event)" :checked="fragment.task.done">Done</b-checkbox>
                 </b-form-group>
                 <b-form-group class="color-group">
-                  <b-button
+                  <button
                     class="color"
                     :data-checked="fragment.task.color === name"
                     v-for="(color, name) in COLORS" 
                     :style="{ color: color }"
                     :key="`color-${name}`"
                     @click="updateTask(fragment, 'color', name)"
-                  ></b-button>
+                  ></button>
                 </b-form-group>
               </b-dropdown-form>
-            </b-dropdown>
+            </b-dropdown> -->
 
             <!-- <b-checkbox class="check"></b-checkbox> -->
 
-            <div class="resize" @mousedown="startFragmentAction('resize', $event, fragment)"></div>
+            <div 
+              class="bg-black opacity-50 absolute w-full h-1 bottom-0 rounded
+                cursor-ns-resize" 
+              @mousedown="startFragmentAction('resize', $event, fragment)"
+            ></div>
           </div>
         </div>
       </div>
