@@ -1,7 +1,7 @@
 <template>
-  <div class="date-format">
-    <div class="date-calling">{{ dateCalling }}</div>
-    <div class="date-detail">{{ dateDetail }}</div>
+  <div class="">
+    <span class="inline-block heading text-2xl font-normal mr-1">{{ dateCalling }}</span>
+    <span class="inline-block font-light">{{ dateDetail }}</span>
   </div>
 </template>
 
@@ -22,22 +22,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.date-format {
-  margin-bottom: 1em;
-  
-  .date-calling {
-    font-size: 1.5em;
-    font-weight: bold;
-    display: inline-block;
-    font-family: 'Josefin Sans', sans-serif;
-  }
-
-  .date-detail {
-    display: inline-block;
-    font-size: 1.15em;
-    color: #969696;
-  }
-}
-</style>

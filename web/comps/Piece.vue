@@ -1,7 +1,7 @@
 <template>
-  <div class="piece" v-if="data && value">
-    <label class="bg" @click="close"></label>
-    <div class="wrapper">
+  <div class="fixed top-0 left-0 w-screen h-screen z-10 overflow-auto" v-if="data && value">
+    <label class="w-full h-full fixed top-0 left-0 bg-black opacity-60" @click="close"></label>
+    <div class="bg-white border container mx-auto my-10 relative z-20 shadow-lg rounded-lg">
       <div class="editor-wrapper">
         <TimizeEditor 
           v-model="content" 
@@ -10,16 +10,16 @@
           @click.native="doClick"
         ></TimizeEditor>
       </div>
-      <div class="bottom-bar">
-        <div class="status">
-          <div class="state" :enabled="state === 'unsaved'">Unsaved</div>
-          <div class="state" :enabled="state === 'saving'">Saving</div>
-          <div class="state" :enabled="state === 'saved'">Saved</div>
+      <div class="flex justify-between text-slate-300 font-bold text-xs uppercase py-1">
+        <div class="flex">
+          <div class="pl-3 m-active:text-slate-600" :active="state === 'unsaved'">Unsaved</div>
+          <div class="pl-3 m-active:text-slate-600" :active="state === 'saving'">Saving</div>
+          <div class="pl-3 m-active:text-slate-600" :active="state === 'saved'">Saved</div>
         </div>
 
-        <div class="info">
-          <div class="state">Shared</div>
-          <div class="state">Outdated</div>
+        <div class="flex">
+          <div class="pr-3 m-active:text-slate-600">Shared</div>
+          <div class="pr-3 m-active:text-slate-600">Outdated</div>
         </div>
       </div>
     </div>
@@ -158,63 +158,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.piece {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 100;
-
-  label.bg {
-    background-color: rgba(0, 0, 0, .5);
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .wrapper {
-    background-color: white;
-    position: absolute;
-    top: 10%;
-    left: 10%;
-    width: 80%;
-    height: 80%;
-    border-radius: .5em;
-    padding: 0;
-
-    .editor-wrapper {
-      height: calc(100% - 30px);
-    }
-
-    .bottom-bar {
-      height: 30px;
-      line-height: 30px;
-      display: flex;
-      justify-content: space-between;
-
-      .status,
-      .info {
-        display: flex;
-      }
-
-      .state {
-        text-transform: uppercase;
-        color: #c0c0c0;
-        font-weight: bold;
-        font-size: .7em;
-        margin: 0 .5em;
-      }
-
-      .state[enabled] {
-        color: #646464;
-      }
-    }
-  }
-}
-</style>

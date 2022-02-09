@@ -106,11 +106,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-.select-or-create .ui.selection.dropdown,
-.select-or-create .ui.selection.active.dropdown,
-.select-or-create .ui.selection.active.dropdown .menu {
-  border: 1px solid #ced4da;
-}
-</style>

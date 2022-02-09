@@ -56,17 +56,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-.currency-input {
-  font-weight: bold;
-}
-
-.currency-input[transaction-type="income"] {
-  color: var(--green);
-}
-
-.currency-input[transaction-type="expense"] {
-  color: var(--red);
-}
-</style>

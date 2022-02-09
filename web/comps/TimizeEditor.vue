@@ -182,34 +182,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-.tm-editor {
-  height: 100%;
-
-  .quill-editor {
-    height: 100%;
-    .ql-editor {
-      padding: .8em;
-      font-family: Quicksand, sans-serif;
-      font-size: 12pt;
-    }
-  }
-
-  .create-hashtag-popup {
-    position: fixed;
-    background-color: #fff;
-    border-radius: 15px;
-    line-height: 30px;
-    height: 30px;
-    margin-top: 30px;
-    padding: 0 .5em;
-    box-shadow: 0 .1em .4em rgba(0, 0, 0, .3);
-    cursor: pointer;
-
-    b {
-      color: #D81B60;
-    }
-  }
-}
-</style>

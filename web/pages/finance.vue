@@ -214,18 +214,3 @@ export default {
 }
 </script>
 
-<style lang="scss">
-.finance .amount {
-  font-weight: bold;
-  text-align: right;
-}
-
-.finance .amount[type="income"] {
-  color: var(--green);
-}
-
-.finance .amount[type="expense"] {
-  color: var(--red);
-}
-</style>
-</style>

@@ -122,9 +122,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-$border: 1px solid var(--border);
-$cell-height: 50px;
-$date-cell-height: 60px;
-</style>

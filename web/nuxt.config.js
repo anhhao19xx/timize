@@ -13,16 +13,20 @@ module.exports = {
   publicRuntimeConfig: {
     apiUrl: mode === 'production' ? 'https://timize.anhhao.me' : 'http://localhost:3001/timize'
   },
-  modules: [
-    'bootstrap-vue/nuxt',
-    'nuxt-minimal-admin'
-  ],
-  bootstrapVue: {
-    bootstrapCSS: false, // Or `css: false`
-    bootstrapVueCSS: false // Or `bvCSS: false`
-  },
   buildModules: [
+    '@nuxt/postcss8',
     '@nuxtjs/pwa',
+  ],
+  build: {
+    postcss: {
+      plugins: {
+        tailwindcss: {},
+        autoprefixer: {},
+      },
+    },
+  },
+  modules: [
+    'nuxt-minimal-admin'
   ],
   pwa: {
     meta: {

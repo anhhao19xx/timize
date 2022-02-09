@@ -96,7 +96,7 @@ export default {
     }
 
     if (controls.$limit !== -1){
-      queryBuilder = queryBuilder.limit(controls.$limit);
+      queryBuilder = queryBuilder.limit(controls.$limit || 10);
     }
 
     if (controls.$sort){

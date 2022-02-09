@@ -1,50 +1,57 @@
 <template>
   <div class="timeline container-fluid" ref="container">
-    <b-row>    
-      <b-col cols="9 main">
-        <b-button variant="primary" class="add-piece" @click="addPiece"><big>+</big></b-button>
+    <div class="">    
+      <div class="w-9/12 pr-8">
+        <button class="primary border rounded py-1 px-3 mx-auto my-4 block" @click="addPiece"><big>+</big></button>
 
-        <div v-for="item in dataGroupByDate" :key="item.groupValue" class="piece-group">
+        <div 
+          v-for="item in dataGroupByDate" 
+          :key="item.groupValue" 
+          class="ml-16 mt-8"
+        >
           <DateFormat :date="item.groupValue"></DateFormat>
 
-          <div v-for="piece in item.list" :key="piece.id" class="piece" @click="handleSelectPiece($event, piece)">
-            <div class="time">{{ formatTime(piece.createdAt) }}</div>
-            <div class="top-bar">
-              <!-- <b-button @click="selectPiece(piece)" variant="outline-primary" size="sm">
-                <i class="icon icon-pencil"></i>
-              </b-button> -->
-              <b-button @click="copyPiece(piece)" variant="outline-primary" size="sm">
-                <i class="icon icon-link"></i>
-              </b-button>
-              <b-button @click="sharePiece(piece)" variant="outline-primary" size="sm">
-                <i class="icon icon-share"></i>
-              </b-button>
-              <b-button @click="removePiece(piece)" variant="outline-danger" size="sm">
-                <i class="icon icon-trash"></i>
-              </b-button>
+          <m-panel 
+            v-for="piece in item.list" 
+            :key="piece.id" 
+            class="mt-4 relative min-h-[9em] rounded-lg"
+            @click.native="handleSelectPiece($event, piece)"
+          >
+            <!-- Time -->
+            <div class="absolute top-4 left-[-3rem]">{{ formatTime(piece.createdAt) }}</div>
+            <!-- End Time -->
+
+            <!-- Topbar -->
+            <div class="absolute top-4 right-4">
+              <button @click="copyPiece(piece)" class="block w-8 h-8 leading-8 border border-black mb-2 rounded hover:primary">
+                <ion-icon name="link-outline"></ion-icon>
+              </button>
+              <button @click="sharePiece(piece)" class="block w-8 h-8 leading-8 border border-black mb-2 rounded hover:primary">
+                <ion-icon name="share-social-outline"></ion-icon>
+              </button>
+              <button @click="removePiece(piece)" class="block w-8 h-8 leading-8 border border-red-600 text-red-600 mb-2 rounded hover:danger hover:border-0">
+                <ion-icon name="trash-outline"></ion-icon>
+              </button>
             </div>
+            <!-- End Topbar -->
+
             <MdViewer 
-              class="content" 
+              class="content pr-10" 
               :value="piece.content" 
               @change="updatePieceContent(piece, $event)"
               @route="doRoute"
             ></MdViewer>
-          </div>
+          </m-panel>
         </div>
 
         <div class="text-center pb-5">
-          <b-button variant="outline-primary" v-if="isMore" @click="loadMore">More</b-button>
+          <button variant="outline-primary" v-if="isMore" @click="loadMore">More</button>
         </div>
-      </b-col>
+      </div>
 
-      <b-col cols="3" class="pr-0">
-        <div class="piece-group top">
+      <m-panel class="w-3/12 pr-0 fixed top-0 right-0 p-0 pt-12 bg-white h-screen border-l">
+        <div class="h-full p-4 overflow-auto">
           <div v-if="top" class="piece" @click="handleSelectPiece($event, top)">
-            <!-- <div class="top-bar">
-              <b-button @click="selectPiece(top)" variant="outline-primary" size="sm">
-                <i class="icon icon-pencil"></i>
-              </b-button>
-            </div> -->
             <MdViewer 
               class="content" 
               :value="top.content" 
@@ -53,8 +60,8 @@
             ></MdViewer>
           </div>
         </div>
-      </b-col>
-    </b-row>
+      </m-panel>
+    </div>
 
     <Piece v-model="currentPiece"/>
   </div>
@@ -270,92 +277,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss">
-.timeline {
-  height: calc(100vh - 50px);
-  overflow-y: hidden;
-
-  .main {
-    height: calc(100vh - 50px);
-    overflow-y: auto;
-    padding-left: 4em;
-  }
-
-  .add-piece {
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    text-align: center;
-    line-height: 36px;
-    margin: 0 auto;
-    display: block;
-    margin-top: 1em;
-
-    big {
-      font-size: 26px;
-    }
-  }
-
-  .piece-group {
-    margin-top: 1em;
-    margin-bottom: 1em;
-    
-    padding-top: 1em;
-    padding-bottom: 1em;
-    
-
-    .piece {
-      position: relative;
-      border: 1px solid var(--border);
-      padding: 1em 2.8em .5em 1em;
-      margin: 1em 0;
-      min-height: 9.5em;
-      border-radius: .5em;
-      background-color: var(--secondary-bg);
-      
-      .time {
-        position: absolute;
-        left: -4em;
-        width: 3em;
-        text-align: right;
-        font-size: .9em;
-      }
-
-      .top-bar {
-        position: absolute;
-        top: 0;
-        right: 0;
-
-        button {
-          display: block;
-          margin: .5em;
-          font-size: .8em;
-
-          * {
-            pointer-events: none;
-          }
-        }
-      }
-    } 
-
-    &.top {
-      position: sticky;
-      top: 50px;
-      margin-top: 0;
-      padding-top: 0;
-      height: calc(100vh - 50px);
-
-      .piece {
-        margin: 0;
-        border-radius: 0;
-        border-top: none;
-        border-bottom: none;
-        border-right: none;
-        height: 100%;
-        overflow-y: auto;
-      }
-    }
-  }
-}
-</style>

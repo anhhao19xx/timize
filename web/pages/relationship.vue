@@ -65,10 +65,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-
-.relationship .net {
-  height: calc(100vh - 60px);
-}
-</style>
