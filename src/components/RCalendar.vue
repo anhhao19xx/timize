@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref, reactive, watch, onMounted, onUnmounted } from 'vue';
+import { clone, equals } from 'ramda';
 
 import CalendarIcon from '@rugo-vn/vue/dist/ionicons/CalendarIcon.vue';
 import ChevronBackIcon from '@rugo-vn/vue/dist/ionicons/ChevronBackIcon.vue';
@@ -11,7 +12,13 @@ import { DatePicker } from 'v-calendar';
 
 // input/output
 const props = defineProps(['modelValue', 'from', 'to']);
-const emit = defineEmits(['update:modelValue', 'update:currentDate']);
+const emit = defineEmits([
+  'selectEvent',
+  'update:modelValue',
+  'update:singleEvent',
+  'update:currentDate',
+  'update:selectedRange',
+]);
 
 // init
 const HOURS = 24;
@@ -62,11 +69,13 @@ const updateDateRange = () => {
 };
 
 const syncValue = () => {
-  if (JSON.stringify(events) === JSON.stringify(props.modelValue)) return;
+  const nextValue = clone(props.modelValue || []);
+
+  if (equals(events, nextValue)) return;
 
   while (events.length > 0) events.shift();
 
-  for (const event of props.modelValue) {
+  for (const event of nextValue) {
     events.push(event);
   }
 };
@@ -314,13 +323,18 @@ const endDrag = (e) => {
 
   if (selectedEvent) {
     moveSelected(e);
+    emit('update:modelValue', clone(events));
+    emit('update:singleEvent', clone(selectedEvent));
     selectedEvent = null;
     isResize = false;
-    emit('update:modelValue', events);
     return;
   }
 
   nextDrag(e);
+  emit('update:selectedRange', {
+    from: placeholderEvent.from,
+    to: placeholderEvent.to,
+  });
   isResize = false;
 };
 
@@ -343,6 +357,10 @@ const selectEvent = (e, event) => {
 
 const markAsResize = () => {
   isResize = true;
+};
+
+const emitSelectEvent = (event) => {
+  emit('selectEvent', clone(event));
 };
 
 // computed
@@ -406,6 +424,16 @@ const datePickerAttrs = computed(() => {
   ];
 });
 
+const clearSelectedRange = () => {
+  placeholderEvent.from = 0;
+  placeholderEvent.to = 0;
+
+  emit('update:selectedRange', {
+    from: 0,
+    to: 0,
+  });
+};
+
 // events
 onMounted(() => {
   loop = setInterval(syncTime, EVERY_MINUTE);
@@ -420,7 +448,12 @@ onUnmounted(() => {
   window.removeEventListener('mousemove', onDrag);
 });
 
-watch(() => props.events, syncValue);
+watch(() => props.modelValue, syncValue, { deep: true });
+
+// exposes
+defineExpose({
+  clearSelectedRange,
+});
 
 // handle
 updateDateRange();
@@ -433,7 +466,7 @@ syncValue();
       <!-- time label -->
       <div class="w-16 border-r border-l border-b">
         <!-- time label -->
-        <div class="w-16 border-t h-24 p-3.5">
+        <div class="w-16 border-t h-24 p-3.5 z-20 relative">
           <DatePicker
             v-model="currentDate"
             @update:modelValue="updateDateRange"
@@ -546,11 +579,12 @@ syncValue();
 
             <!-- fragments -->
             <div
-              class="absolute text-white px-2 py-1 rounded border-l border-b"
+              class="absolute text-white px-1 py-0.5 rounded border-l border-b"
               v-for="fragment in getFragments(date)"
               :key="`fragment-${fragment.id}`"
               :style="fragment.style"
               @mousedown="selectEvent($event, fragment.event)"
+              @click="emitSelectEvent(fragment.event)"
             >
               {{ fragment.event.title }}
               <button
