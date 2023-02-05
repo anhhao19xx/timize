@@ -3,6 +3,8 @@ import { ref } from 'vue';
 
 import RCalendar from '../components/RCalendar.vue';
 import RDialog from '../components/RDialog.vue';
+import RCheckbox from '../components/RCheckbox.vue';
+
 import EventForm from '../components/EventForm.vue';
 import { useAppStore } from '../stores/app';
 import { RDialogActions } from '../constants';
@@ -53,7 +55,10 @@ const handleAction = (name, event) => {
 };
 
 const updateSingleEvent = (event) => {
-  if (!appStore.updateEvent(event)) return;
+  if (!appStore.updateEvent(event)) {
+    refEventDialog.value?.hide();
+    return;
+  }
 
   currentEvent.value = {};
   refEventDialog.value?.hide();
@@ -80,15 +85,22 @@ const updateSingleEvent = (event) => {
           "
         />
 
-        <RButton
-          variant="primary"
-          @click="
-            mode === RDialogActions.CREATE
-              ? addEvent()
-              : updateSingleEvent(currentEvent)
-          "
-          >Save</RButton
-        >
+        <div class="flex justify-between">
+          <RButton
+            variant="primary"
+            @click="
+              mode === RDialogActions.CREATE
+                ? addEvent()
+                : updateSingleEvent(currentEvent)
+            "
+            >Save</RButton
+          >
+
+          <RCheckbox
+            :modelValue="currentEvent['done']"
+            @update:modelValue="currentEvent['done'] = $event"
+          />
+        </div>
       </RDialog>
 
       <RCalendar

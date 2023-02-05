@@ -2,6 +2,8 @@
 import { clone, equals } from 'ramda';
 import { reactive, watch, defineProps, defineEmits } from 'vue';
 
+import RColorPicker from './RColorPicker.vue';
+
 const props = defineProps(['modelValue']);
 const emit = defineEmits(['update:modelValue', 'submit']);
 
@@ -51,11 +53,22 @@ syncValue();
       :disabled="true"
       @keyup.enter="submitForm"
     />
-    <RInput
-      label="Color"
-      :modelValue="form['color']"
-      @update:modelValue="edit('color', $event)"
-      @keyup.enter="submitForm"
-    />
+
+    <div class="flex items-center mb-6">
+      <RColorPicker
+        class="mr-4"
+        :modelValue="form['color']"
+        @update:modelValue="edit('color', $event)"
+      />
+
+      <RInput
+        class="flex-1 my-0"
+        label="Color"
+        :modelValue="form['color']"
+        :disabled="true"
+        @update:modelValue="edit('color', $event)"
+        @keyup.enter="submitForm"
+      />
+    </div>
   </div>
 </template>

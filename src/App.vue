@@ -16,10 +16,14 @@ const toggleSettingPanel = () => {
 </script>
 
 <template>
-  <RTopBar :rightIcon="SettingsIcon" @action="toggleSettingPanel" />
+  <RTopBar
+    class="fixed z-[30] shadow-md"
+    :rightIcon="SettingsIcon"
+    @action="toggleSettingPanel"
+  />
 
   <div
-    :class="`fixed z-10 top-0 h-screen transition-all w-80 ${
+    :class="`fixed z-30 top-0 h-screen transition-all w-80 ${
       isSettingPanelOpened ? 'right-0' : 'right-[-20rem]'
     }`"
   >
@@ -29,7 +33,7 @@ const toggleSettingPanel = () => {
       v-if="isSettingPanelOpened"
     ></label>
 
-    <div class="absolute bg-white top-0 right-0 w-full h-screen">
+    <div class="absolute bg-white top-0 right-0 w-full h-screen shadow-md">
       <RTopBar :rightIcon="CloseIcon" @action="toggleSettingPanel">
         <template #logo>Settings</template>
       </RTopBar>
@@ -45,6 +49,8 @@ const toggleSettingPanel = () => {
       </div>
     </div>
   </div>
+
+  <div class="mt-20"></div>
 
   <RouterView />
 

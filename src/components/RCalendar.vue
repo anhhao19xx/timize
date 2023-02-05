@@ -160,8 +160,11 @@ const getFragments = (date) => {
         : fromDate.toDate(),
       to: toDate.isSameOrAfter(endDate) ? endDate.toDate() : toDate.toDate(),
       style: {
-        backgroundColor:
-          colors[event.color.split('-')[0]][event.color.split('-')[1] || '500'],
+        backgroundColor: event.done
+          ? colors['gray']['500']
+          : colors[event.color.split('-')[0]][
+              event.color.split('-')[1] || '500'
+            ],
         opacity: event === placeholderEvent ? 0.3 : 1,
       },
       isPlaced: false,
@@ -542,7 +545,7 @@ syncValue();
       <!-- end time label -->
 
       <div class="flex-1">
-        <div class="flex w-full">
+        <div class="flex w-full relative">
           <!-- month header -->
           <div
             class="border-r border-t text-center py-2 h-8"
@@ -555,9 +558,27 @@ syncValue();
             <div class="h-6 uppercase">{{ month.value }}</div>
           </div>
           <!-- end month header -->
+
+          <!-- date controls -->
+          <RButton
+            class="absolute left-2 top-[1.125rem] px-2 py-2 rounded-full"
+            variant="primary"
+            @click="shiftWeek(-1)"
+          >
+            <ChevronBackIcon />
+          </RButton>
+
+          <RButton
+            class="absolute right-2 top-[1.125rem] px-2 py-2 rounded-full"
+            variant="primary"
+            @click="shiftWeek(1)"
+          >
+            <ChevronForwardIcon />
+          </RButton>
+          <!-- end date controls -->
         </div>
 
-        <div class="flex w-full relative">
+        <div class="flex w-full">
           <!-- date header -->
           <div
             class="flex-1 border-r border-t text-center h-16 flex flex-col items-center"
@@ -578,24 +599,6 @@ syncValue();
             </div>
           </div>
           <!-- end date header -->
-
-          <!-- date controls -->
-          <RButton
-            class="absolute left-[-1rem] top-4 px-2 py-2 rounded-full"
-            variant="primary"
-            @click="shiftWeek(-1)"
-          >
-            <ChevronBackIcon />
-          </RButton>
-
-          <RButton
-            class="absolute right-[-1rem] top-4 px-2 py-2 rounded-full"
-            variant="primary"
-            @click="shiftWeek(1)"
-          >
-            <ChevronForwardIcon />
-          </RButton>
-          <!-- end date controls -->
         </div>
 
         <div ref="refTimeSheet" class="flex w-full">
@@ -645,7 +648,7 @@ syncValue();
       </div>
     </div>
 
-    <div v-if="menuEvent" class="absolute" :style="cursorMenuStyle">
+    <div v-if="menuEvent" class="absolute z-10" :style="cursorMenuStyle">
       <div class="bg-white rounded-3xl p-1 shadow-md mb-1">
         <RButton
           class="px-2 py-2 h-8 w-8 rounded-full"
@@ -656,7 +659,7 @@ syncValue();
         </RButton>
       </div>
 
-      <div class="bg-white rounded-3xl p-1 shadow-md">
+      <div class="bg-white rounded-3xl p-1 shadow-md mb-1">
         <RButton
           class="px-2 py-2 h-8 w-8 rounded-full"
           variant="danger"
