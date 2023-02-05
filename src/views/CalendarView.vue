@@ -30,24 +30,26 @@ const deleteEvent = () => {
   refCalendar.value.clearSelectedRange();
 };
 
-const showEditDialog = (event) => {
+const handleAction = (name, event) => {
   currentEvent.value = event;
 
-  if (event.id === -1) {
-    mode.value = RDialogActions.CREATE;
-    delete currentEvent.value.id;
-    delete currentEvent.value.title;
-  } else {
-    mode.value = RDialogActions.EDIT;
+  switch (name) {
+    case RDialogActions.CREATE:
+      mode.value = RDialogActions.CREATE;
+      delete currentEvent.value.id;
+      delete currentEvent.value.title;
+      break;
+    case RDialogActions.EDIT:
+      mode.value = RDialogActions.EDIT;
+      break;
+    case RDialogActions.DELETE:
+      deleteEvent();
+      return;
+    default:
+      return;
   }
 
   refEventDialog.value.show();
-};
-
-const updateSelectdDateRange = ({ from, to }) => {
-  currentEvent.value.from = from;
-  currentEvent.value.to = to;
-  mode.value = RDialogActions.CREATE;
 };
 
 const updateSingleEvent = (event) => {
@@ -60,24 +62,9 @@ const updateSingleEvent = (event) => {
 </script>
 
 <template>
-  <RPanel>
-    <div class="mb-4 h-8">
-      <RButton
-        :disabled="true"
-        variant="primary"
-        v-if="!(currentEvent.from && currentEvent.to)"
-        >{{ `${mode === RDialogActions.CREATE ? 'Create' : `Edit`}` }}</RButton
-      >
-
-      <RDialog
-        v-if="currentEvent.from && currentEvent.to"
-        ref="refEventDialog"
-        :label="
-          mode === RDialogActions.CREATE
-            ? 'Create'
-            : `Edit &quot;${currentEvent.title}&quot;`
-        "
-      >
+  <div class="px-4 my-4">
+    <RPanel>
+      <RDialog ref="refEventDialog" :label="false">
         <RHeading type="h3">{{
           mode === RDialogActions.CREATE
             ? 'Create a new event'
@@ -104,26 +91,12 @@ const updateSingleEvent = (event) => {
         >
       </RDialog>
 
-      <RButton
-        class="ml-2"
-        :disabled="mode !== RDialogActions.EDIT"
-        variant="danger"
-        @click="deleteEvent"
-      >
-        {{
-          mode === RDialogActions.EDIT
-            ? `Delete "${currentEvent.title}"`
-            : 'Delete'
-        }}
-      </RButton>
-    </div>
-
-    <RCalendar
-      ref="refCalendar"
-      :modelValue="appStore.events"
-      @selectEvent="showEditDialog"
-      @update:selectedRange="updateSelectdDateRange"
-      @update:singleEvent="updateSingleEvent"
-    />
-  </RPanel>
+      <RCalendar
+        ref="refCalendar"
+        :modelValue="appStore.events"
+        @update:singleEvent="updateSingleEvent"
+        @action="handleAction"
+      />
+    </RPanel>
+  </div>
 </template>

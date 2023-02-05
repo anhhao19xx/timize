@@ -5,6 +5,8 @@ import { clone, equals } from 'ramda';
 import CalendarIcon from '@rugo-vn/vue/dist/ionicons/CalendarIcon.vue';
 import ChevronBackIcon from '@rugo-vn/vue/dist/ionicons/ChevronBackIcon.vue';
 import ChevronForwardIcon from '@rugo-vn/vue/dist/ionicons/ChevronForwardIcon.vue';
+import CreateIcon from '@rugo-vn/vue/dist/ionicons/CreateIcon.vue';
+import TrashIcon from '@rugo-vn/vue/dist/ionicons/TrashIcon.vue';
 
 import colors from 'tailwindcss/colors';
 import moment from 'moment';
@@ -13,11 +15,10 @@ import { DatePicker } from 'v-calendar';
 // input/output
 const props = defineProps(['modelValue', 'from', 'to']);
 const emit = defineEmits([
-  'selectEvent',
+  'action',
   'update:modelValue',
   'update:singleEvent',
   'update:currentDate',
-  'update:selectedRange',
 ]);
 
 // init
@@ -29,12 +30,17 @@ const EVERY_MINUTE = SECONDS * MILLISECONDS;
 const EVERY_DAY = HOURS * MINUTES * SECONDS * MILLISECONDS;
 const MID_NIGHT = { hour: 0, minute: 0, second: 0, millisecond: 0 };
 const ROUNDED_HOUR = 0.5;
+const PLACEHOLDER_EVENT_ID = -1;
 const DEFAULT_PLACEHOLDER_EVENT = {
-  id: -1,
+  id: PLACEHOLDER_EVENT_ID,
   from: 0,
   to: 0,
   title: 'Create a new event',
   color: 'sky',
+};
+const MenuActions = {
+  CREATE_OR_EDIT: 'createOrEdit',
+  DELETE: 'delete',
 };
 
 const refTimeSheet = ref(null);
@@ -45,6 +51,9 @@ const events = reactive([]);
 const currentDate = ref(new Date(props.from || new Date()));
 const fromDate = ref(null);
 const toDate = ref(null);
+
+const cursorMenuStyle = reactive({});
+const menuEvent = ref(null);
 
 let loop = null;
 let currentFragmentId = 1;
@@ -273,6 +282,8 @@ const pointToDate = (e) => {
 };
 
 const startDrag = (e) => {
+  if (e.button !== 0) return;
+
   isDrag = true;
 
   if (selectedEvent) return;
@@ -310,32 +321,45 @@ const moveSelected = (e) => {
   const cursorDate = pointToDate(e);
   const duration = cursorDate - selectedDate;
 
+  if (!duration) return false;
+
   if (!isResize)
     selectedEvent.from = new Date(+originFromDate + duration).toISOString();
 
   const tmpTo = new Date(+originToDate + duration).toISOString();
   if (tmpTo > selectedEvent.from) selectedEvent.to = tmpTo;
+
+  return true;
 };
 
 const endDrag = (e) => {
-  if (!isDrag) return;
+  if (e.button !== 0) return;
+
+  if (!isDrag) {
+    menuEvent.value = false;
+    return;
+  }
+
   isDrag = false;
 
   if (selectedEvent) {
-    moveSelected(e);
-    emit('update:modelValue', clone(events));
-    emit('update:singleEvent', clone(selectedEvent));
-    selectedEvent = null;
+    if (moveSelected(e)) {
+      emit('update:modelValue', clone(events));
+      emit('update:singleEvent', clone(selectedEvent));
+    } else {
+      menuEvent.value = selectedEvent;
+      cursorMenuStyle.top = `${e.pageY + 10}px`;
+      cursorMenuStyle.left = `${e.pageX + 10}px`;
+    }
+
     isResize = false;
+    selectedEvent = null;
     return;
   }
 
   nextDrag(e);
-  emit('update:selectedRange', {
-    from: placeholderEvent.from,
-    to: placeholderEvent.to,
-  });
   isResize = false;
+  menuEvent.value = false;
 };
 
 const onDrag = (e) => {
@@ -359,8 +383,38 @@ const markAsResize = () => {
   isResize = true;
 };
 
-const emitSelectEvent = (event) => {
-  emit('selectEvent', clone(event));
+const clearSelectedRange = () => {
+  placeholderEvent.from = 0;
+  placeholderEvent.to = 0;
+};
+
+const callAction = (name) => {
+  if (
+    menuEvent.value.id === PLACEHOLDER_EVENT_ID &&
+    name === MenuActions.DELETE
+  ) {
+    menuEvent.value = null;
+    clearSelectedRange();
+    return;
+  }
+
+  if (
+    menuEvent.value.id === PLACEHOLDER_EVENT_ID &&
+    name === MenuActions.CREATE_OR_EDIT
+  ) {
+    emit('action', 'create', clone(menuEvent.value));
+    return;
+  }
+
+  if (name === MenuActions.CREATE_OR_EDIT) {
+    emit('action', 'edit', clone(menuEvent.value));
+    return;
+  }
+
+  if (name === MenuActions.DELETE) {
+    emit('action', 'delete', clone(menuEvent.value));
+    return;
+  }
 };
 
 // computed
@@ -423,16 +477,6 @@ const datePickerAttrs = computed(() => {
     },
   ];
 });
-
-const clearSelectedRange = () => {
-  placeholderEvent.from = 0;
-  placeholderEvent.to = 0;
-
-  emit('update:selectedRange', {
-    from: 0,
-    to: 0,
-  });
-};
 
 // events
 onMounted(() => {
@@ -579,12 +623,15 @@ syncValue();
 
             <!-- fragments -->
             <div
-              class="absolute text-white px-1 py-0.5 rounded border-l border-b"
+              :class="`absolute text-white px-1 py-0.5 rounded border-l border-b ${
+                fragment.event === menuEvent
+                  ? 'outline outline-2 outline-primary-500'
+                  : ''
+              }`"
               v-for="fragment in getFragments(date)"
               :key="`fragment-${fragment.id}`"
               :style="fragment.style"
               @mousedown="selectEvent($event, fragment.event)"
-              @click="emitSelectEvent(fragment.event)"
             >
               {{ fragment.event.title }}
               <button
@@ -595,6 +642,28 @@ syncValue();
             <!-- end fragments -->
           </div>
         </div>
+      </div>
+    </div>
+
+    <div v-if="menuEvent" class="absolute" :style="cursorMenuStyle">
+      <div class="bg-white rounded-3xl p-1 shadow-md mb-1">
+        <RButton
+          class="px-2 py-2 h-8 w-8 rounded-full"
+          variant="primary"
+          @mousedown="callAction(MenuActions.CREATE_OR_EDIT)"
+        >
+          <CreateIcon class="text-base" />
+        </RButton>
+      </div>
+
+      <div class="bg-white rounded-3xl p-1 shadow-md">
+        <RButton
+          class="px-2 py-2 h-8 w-8 rounded-full"
+          variant="danger"
+          @mousedown="callAction(MenuActions.DELETE)"
+        >
+          <TrashIcon class="text-base" />
+        </RButton>
       </div>
     </div>
   </div>
