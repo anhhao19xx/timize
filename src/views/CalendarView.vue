@@ -24,7 +24,7 @@ const addEvent = () => {
 };
 
 const deleteEvent = () => {
-  if (!window.confirm('Do you want to delete?')) return;
+  // if (!window.confirm('Do you want to delete?')) return;
 
   appStore.deleteEvent(currentEvent.value);
   currentEvent.value = {};
@@ -46,6 +46,11 @@ const handleAction = (name, event) => {
       break;
     case RDialogActions.DELETE:
       deleteEvent();
+      return;
+    case RDialogActions.DUPLICATE:
+      delete currentEvent.value.id;
+      mode.value = RDialogActions.CREATE;
+      addEvent();
       return;
     default:
       return;

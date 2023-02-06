@@ -7,6 +7,7 @@ import ChevronBackIcon from '@rugo-vn/vue/dist/ionicons/ChevronBackIcon.vue';
 import ChevronForwardIcon from '@rugo-vn/vue/dist/ionicons/ChevronForwardIcon.vue';
 import CreateIcon from '@rugo-vn/vue/dist/ionicons/CreateIcon.vue';
 import TrashIcon from '@rugo-vn/vue/dist/ionicons/TrashIcon.vue';
+import CopyIcon from '@rugo-vn/vue/dist/ionicons/CopyIcon.vue';
 
 import colors from 'tailwindcss/colors';
 import moment from 'moment';
@@ -41,6 +42,7 @@ const DEFAULT_PLACEHOLDER_EVENT = {
 const MenuActions = {
   CREATE_OR_EDIT: 'createOrEdit',
   DELETE: 'delete',
+  DUPLICATE: 'duplicate',
 };
 
 const refTimeSheet = ref(null);
@@ -389,6 +391,7 @@ const markAsResize = () => {
 const clearSelectedRange = () => {
   placeholderEvent.from = 0;
   placeholderEvent.to = 0;
+  menuEvent.value = null;
 };
 
 const callAction = (name) => {
@@ -417,6 +420,10 @@ const callAction = (name) => {
   if (name === MenuActions.DELETE) {
     emit('action', 'delete', clone(menuEvent.value));
     return;
+  }
+
+  if (name === MenuActions.DUPLICATE) {
+    emit('action', 'duplicate', clone(menuEvent.value));
   }
 };
 
@@ -656,6 +663,16 @@ syncValue();
           @mousedown="callAction(MenuActions.CREATE_OR_EDIT)"
         >
           <CreateIcon class="text-base" />
+        </RButton>
+      </div>
+
+      <div class="bg-white rounded-3xl p-1 shadow-md mb-1">
+        <RButton
+          class="px-2 py-2 h-8 w-8 rounded-full"
+          variant="primary"
+          @mousedown="callAction(MenuActions.DUPLICATE)"
+        >
+          <CopyIcon class="text-base" />
         </RButton>
       </div>
 
