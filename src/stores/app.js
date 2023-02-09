@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { clone, equals } from 'ramda';
 import { reactive, ref } from 'vue';
+import axios from 'axios';
+import CryptoJS from 'crypto-js';
 import {
   API_EMAIL,
   API_PASSWORD,
@@ -10,7 +12,6 @@ import {
   INFO_LAST_SAVE,
 } from '../constants';
 import { useNoticeStore } from './notice';
-import axios from 'axios';
 
 const validateStatus = (status) => status >= 200 && status < 500;
 
@@ -161,6 +162,20 @@ export const useAppStore = defineStore('app', () => {
     isNotUpToDate.value = false;
   };
 
+  const encrypt = (text) => {
+    return CryptoJS.AES.encrypt(
+      text,
+      localStorage.getItem(API_PASSWORD)
+    ).toString();
+  };
+
+  const decrypt = (text) => {
+    return CryptoJS.AES.decrypt(
+      text,
+      localStorage.getItem(API_PASSWORD)
+    ).toString(CryptoJS.enc.Utf8);
+  };
+
   const saveToCloud = async () => {
     if (!(await tryLogin())) return;
 
@@ -183,7 +198,7 @@ export const useAppStore = defineStore('app', () => {
 
     for (const no in batches) {
       const item = batches[no];
-      item.data = JSON.stringify(item.data);
+      item.data = encrypt(JSON.stringify(item.data));
 
       const res = await http.get(
         `/api/tables/buckets?filters[user]=${item.user}&filters[batch]=${item.batch}`
@@ -240,7 +255,7 @@ export const useAppStore = defineStore('app', () => {
     while (events.length) events.shift();
 
     for (const item of res.data.data) {
-      const batchEvents = JSON.parse(item.data);
+      const batchEvents = JSON.parse(decrypt(item.data));
       for (const batchEvent of batchEvents) events.push(batchEvent);
     }
 
