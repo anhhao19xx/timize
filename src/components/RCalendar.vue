@@ -378,6 +378,13 @@ const onDrag = (e) => {
 };
 
 const selectEvent = (e, event) => {
+  if (e.button === 2) {
+    menuEvent.value = event;
+    cursorMenuStyle.top = `${e.pageY + 10}px`;
+    cursorMenuStyle.left = `${e.pageX + 10}px`;
+    return;
+  }
+
   selectedEvent = event;
   selectedDate = pointToDate(e);
   originFromDate = new Date(event.from);
@@ -425,6 +432,10 @@ const callAction = (name) => {
   if (name === MenuActions.DUPLICATE) {
     emit('action', 'duplicate', clone(menuEvent.value));
   }
+};
+
+const preventDefault = (e) => {
+  e.preventDefault();
 };
 
 // computed
@@ -491,6 +502,7 @@ const datePickerAttrs = computed(() => {
 // events
 onMounted(() => {
   loop = setInterval(syncTime, EVERY_MINUTE);
+  window.addEventListener('contextmenu', preventDefault);
   window.addEventListener('mouseup', endDrag);
   window.addEventListener('mousemove', onDrag);
   syncTime();
@@ -498,6 +510,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   clearInterval(loop);
+  window.removeEventListener('contextmenu', preventDefault);
   window.removeEventListener('mouseup', endDrag);
   window.removeEventListener('mousemove', onDrag);
 });

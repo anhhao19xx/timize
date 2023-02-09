@@ -2,8 +2,6 @@
 import { ref } from 'vue';
 
 import RCalendar from '../components/RCalendar.vue';
-import RDialog from '../components/RDialog.vue';
-import RCheckbox from '../components/RCheckbox.vue';
 
 import EventForm from '../components/EventForm.vue';
 import { useAppStore } from '../stores/app';
@@ -102,8 +100,14 @@ const updateSingleEvent = (event) => {
           >
 
           <RCheckbox
+            variant="primary"
             :modelValue="currentEvent['done']"
-            @update:modelValue="currentEvent['done'] = $event"
+            @update:modelValue="
+              currentEvent['done'] = $event;
+              mode === RDialogActions.CREATE
+                ? null
+                : updateSingleEvent(currentEvent);
+            "
           />
         </div>
       </RDialog>

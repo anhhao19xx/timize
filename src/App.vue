@@ -5,7 +5,6 @@ import CloseIcon from '@rugo-vn/vue/dist/ionicons/CloseIcon.vue';
 
 import { useAppStore } from './stores/app';
 import { RouterView } from 'vue-router';
-import RNotification from './components/RNotification.vue';
 
 const appStore = useAppStore();
 
