@@ -50,6 +50,11 @@ const handleAction = (name, event) => {
       mode.value = RDialogActions.CREATE;
       addEvent();
       return;
+    case RDialogActions.TOGGLE_DONE:
+      mode.value = RDialogActions.EDIT;
+      currentEvent.value.done = !currentEvent.value.done;
+      updateSingleEvent(currentEvent.value);
+      return;
     default:
       return;
   }

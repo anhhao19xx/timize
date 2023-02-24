@@ -4,6 +4,7 @@ export const RDialogActions = {
   EDIT: 'edit',
   DELETE: 'delete',
   DUPLICATE: 'duplicate',
+  TOGGLE_DONE: 'toggle-done',
 };
 
 export const EVENT_STORAGE = 'timize.storage.events';
