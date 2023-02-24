@@ -1,10 +1,13 @@
 <script setup>
 import { ref } from 'vue';
+import { RouterView } from 'vue-router';
 import SettingsIcon from '@rugo-vn/vue/dist/ionicons/SettingsIcon.vue';
 import CloseIcon from '@rugo-vn/vue/dist/ionicons/CloseIcon.vue';
+import CalendarIcon from '@rugo-vn/vue/dist/ionicons/CalendarIcon.vue';
+import ChatboxIcon from '@rugo-vn/vue/dist/ionicons/ChatboxIcon.vue';
 
+import RTopBar from './components/RTopBar.vue';
 import { useAppStore } from './stores/app';
-import { RouterView } from 'vue-router';
 
 const appStore = useAppStore();
 
@@ -16,7 +19,29 @@ const toggleSettingPanel = () => {
 
 <template>
   <div class="fixed z-[30] shadow-md top-0 left-0 w-screen">
-    <RTopBar :rightIcon="SettingsIcon" @action="toggleSettingPanel" />
+    <RTopBar :rightIcon="SettingsIcon" @action="toggleSettingPanel">
+      <template #topbar>
+        <div class="w-full ml-[-2.5rem] h-full flex items-center">
+          <RouterLink to="/">
+            <RButton
+              :variant="appStore.view === 'calendar' ? 'primary' : 'none'"
+              class="px-0 py-0 h-12 w-12 items-center flex flex-col justify-center rounded"
+            >
+              <CalendarIcon class="text-xl" />
+            </RButton>
+          </RouterLink>
+
+          <RouterLink to="/notes">
+            <RButton
+              :variant="appStore.view === 'notes' ? 'primary' : 'none'"
+              class="px-0 py-0 h-12 w-12 items-center flex flex-col justify-center rounded"
+            >
+              <ChatboxIcon class="text-xl" />
+            </RButton>
+          </RouterLink>
+        </div>
+      </template>
+    </RTopBar>
 
     <div
       :class="`fixed z-30 top-0 h-screen transition-all w-80 ${

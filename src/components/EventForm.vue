@@ -3,6 +3,7 @@ import { clone, equals } from 'ramda';
 import { reactive, watch, defineProps, defineEmits } from 'vue';
 
 import RColorPicker from './RColorPicker.vue';
+import RichEditor from './RichEditor.vue';
 
 const props = defineProps(['modelValue']);
 const emit = defineEmits(['update:modelValue', 'submit']);
@@ -68,6 +69,14 @@ syncValue();
         :disabled="true"
         @update:modelValue="edit('color', $event)"
         @keyup.enter="submitForm"
+      />
+    </div>
+
+    <div class="mb-6">
+      <label class="text-xs block mb-2 text-gray-600">Note:</label>
+      <RichEditor
+        :modelValue="form['note']"
+        @update:modelValue="edit('note', $event)"
       />
     </div>
   </div>

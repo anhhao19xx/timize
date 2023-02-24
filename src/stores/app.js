@@ -39,6 +39,8 @@ export const useAppStore = defineStore('app', () => {
     password: localStorage.getItem(API_PASSWORD),
   });
 
+  const view = ref('');
+
   // methods
   const createHttp = () =>
     axios.create({
@@ -271,6 +273,7 @@ export const useAppStore = defineStore('app', () => {
   };
 
   return {
+    view,
     isNotUpToDate,
     isChanged,
     notice,
