@@ -14,8 +14,6 @@ const currentEvent = ref({});
 const mode = ref(RDialogActions.CREATE);
 const appStore = useAppStore();
 
-appStore.view = 'calendar';
-
 const addEvent = () => {
   appStore.addEvent(currentEvent.value);
   currentEvent.value = {};

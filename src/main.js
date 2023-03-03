@@ -6,7 +6,7 @@ import App from './App.vue';
 import router from './router';
 
 import '@rugo-vn/vue/dist/index.css';
-import 'v-calendar/dist/style.css';
+import 'vue3-treeview/dist/style.css';
 import './index.css';
 
 const app = createApp(App);

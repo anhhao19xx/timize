@@ -14,6 +14,12 @@ const router = createRouter({
       name: 'notes',
       component: () => import('../views/NoteListView.vue'),
     },
+
+    {
+      path: '/contents',
+      name: 'contents',
+      component: () => import('../views/ContentView.vue'),
+    },
   ],
 });
 

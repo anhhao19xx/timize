@@ -5,7 +5,6 @@ import { computed } from 'vue';
 import { useAppStore } from '../stores/app';
 
 const appStore = useAppStore();
-appStore.view = 'notes';
 
 const fragments = computed(() => {
   const currentEvents = clone(appStore.events);
