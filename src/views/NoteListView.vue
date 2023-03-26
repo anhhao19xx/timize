@@ -1,10 +1,13 @@
 <script setup>
+import PencilIcon from '@rugo-vn/vue/dist/ionicons/PencilIcon.vue';
 import moment from 'moment';
 import { clone } from 'ramda';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import EventEditor from '../components/EventEditor.vue';
 import { useAppStore } from '../stores/app';
 
 const appStore = useAppStore();
+const currentEventId = ref(null);
 
 const fragments = computed(() => {
   const currentEvents = clone(appStore.events);
@@ -52,6 +55,17 @@ loadEvents(new Date());
 </script>
 
 <template>
+  <EventEditor
+    v-if="currentEventId"
+    :id="currentEventId"
+    @close="
+      {
+        currentEventId = null;
+        loadEvents(new Date());
+      }
+    "
+  />
+
   <div class="px-4 mb-4" v-for="fragment in fragments" :key="fragment.event.id">
     <div class="text-base my-6" v-if="fragment.firstMonthYear">
       {{ formatDateTime(fragment.event.from, 'MMM YYYY') }}
@@ -78,7 +92,14 @@ loadEvents(new Date());
         </span>
       </div>
 
-      <RPanel class="flex-1 mt-[0!important]">
+      <RPanel class="overflow-hidden flex-1 mt-[0!important] relative">
+        <RButton
+          class="px-0 py-0 w-8 h-8 justify-center absolute top-2 right-2"
+          variant="primary"
+          @click="currentEventId = fragment.event.id"
+        >
+          <PencilIcon class="text-lg" />
+        </RButton>
         <div class="content" v-html="fragment.event.note"></div>
       </RPanel>
     </div>

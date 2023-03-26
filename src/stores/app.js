@@ -5,7 +5,7 @@ import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { API_EMAIL, API_PASSWORD, API_TOKEN } from '../constants';
 import { useNoticeStore } from './notice';
-import { Secure } from '@rugo-vn/shared';
+// import { Secure } from '@rugo-vn/shared';
 import moment from 'moment';
 
 const validateStatus = (status) => status >= 200 && status < 500;
@@ -203,6 +203,21 @@ export const useAppStore = defineStore('app', () => {
     return true;
   };
 
+  const forceUpdateEvent = (id, payload) => {
+    const updatedTzEvent = clone(payload);
+    updatedTzEvent.id = id;
+
+    save(updatedTzEvent);
+
+    notice.push(
+      'success',
+      'Success',
+      `The event "${payload.title}" was updated!`
+    );
+
+    return true;
+  };
+
   const deleteEvent = (payload) => {
     let deletedTzEvent;
 
@@ -262,6 +277,18 @@ export const useAppStore = defineStore('app', () => {
     for (const tzEvent of nextEvents) events.push(tzEvent);
   };
 
+  const getEvent = async (id) => {
+    const http = createHttp();
+    const userInfo = await getUserInfo();
+
+    const res = await http.get(
+      `/api/tables/notes/${id}?filters[user]=${userInfo.id}`
+    );
+
+    const item = handleResponse(res);
+    return deserialize(item);
+  };
+
   const createContent = async (name) => {
     const http = createHttp();
     const userInfo = await getUserInfo();
@@ -305,9 +332,11 @@ export const useAppStore = defineStore('app', () => {
     user,
     addEvent,
     updateEvent,
+    forceUpdateEvent,
     deleteEvent,
     login,
     loadEvents,
+    getEvent,
     createContent,
     loadContents,
     updateContent,

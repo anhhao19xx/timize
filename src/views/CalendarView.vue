@@ -3,30 +3,29 @@ import { ref } from 'vue';
 
 import RCalendar from '../components/RCalendar.vue';
 
-import EventForm from '../components/EventForm.vue';
 import { useAppStore } from '../stores/app';
 import { RDialogActions } from '../constants';
+import EventEditor from '../components/EventEditor.vue';
 
 const refEventDialog = ref(null);
 const refCalendar = ref(null);
 
-const currentEvent = ref({});
-const mode = ref(RDialogActions.CREATE);
+const currentEvent = ref(null);
 const appStore = useAppStore();
 
 const addEvent = () => {
   appStore.addEvent(currentEvent.value);
-  currentEvent.value = {};
-  refEventDialog.value.hide();
-  refCalendar.value.clearSelectedRange();
+  currentEvent.value = null;
 };
 
 const deleteEvent = () => {
-  // if (!window.confirm('Do you want to delete?')) return;
+  if (currentEvent.value.note && !window.confirm('Do you want to delete?')) {
+    currentEvent.value = null;
+    return;
+  }
 
   appStore.deleteEvent(currentEvent.value);
-  currentEvent.value = {};
-  refEventDialog.value.hide();
+  currentEvent.value = null;
   refCalendar.value.clearSelectedRange();
 };
 
@@ -35,31 +34,25 @@ const handleAction = (name, event) => {
 
   switch (name) {
     case RDialogActions.CREATE:
-      mode.value = RDialogActions.CREATE;
       delete currentEvent.value.id;
       delete currentEvent.value.title;
       break;
     case RDialogActions.EDIT:
-      mode.value = RDialogActions.EDIT;
       break;
     case RDialogActions.DELETE:
       deleteEvent();
       return;
     case RDialogActions.DUPLICATE:
       delete currentEvent.value.id;
-      mode.value = RDialogActions.CREATE;
       addEvent();
       return;
     case RDialogActions.TOGGLE_DONE:
-      mode.value = RDialogActions.EDIT;
       currentEvent.value.done = !currentEvent.value.done;
       updateSingleEvent(currentEvent.value);
       return;
     default:
       return;
   }
-
-  refEventDialog.value.show();
 };
 
 const updateSingleEvent = (event) => {
@@ -68,7 +61,7 @@ const updateSingleEvent = (event) => {
     return;
   }
 
-  currentEvent.value = {};
+  currentEvent.value = null;
   refEventDialog.value?.hide();
   refCalendar.value.clearSelectedRange();
 };
@@ -78,14 +71,27 @@ const loadEvents = (currentDate) => {
 
   appStore.loadEvents(currentDate);
 };
-
-loadEvents();
 </script>
 
 <template>
   <div class="px-4 my-4">
     <RPanel>
-      <RDialog ref="refEventDialog" :label="false">
+      <EventEditor
+        v-if="currentEvent"
+        :id="currentEvent.id"
+        :form="{
+          from: currentEvent.from,
+          to: currentEvent.to,
+        }"
+        @close="
+          {
+            loadEvents(currentEvent.from);
+            currentEvent = null;
+            refCalendar.clearSelectedRange();
+          }
+        "
+      />
+      <!-- <RDialog ref="refEventDialog" :label="false">
         <RHeading type="h3">{{
           mode === RDialogActions.CREATE
             ? 'Create a new event'
@@ -123,7 +129,7 @@ loadEvents();
             "
           />
         </div>
-      </RDialog>
+      </RDialog> -->
 
       <RCalendar
         ref="refCalendar"
