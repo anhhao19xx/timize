@@ -72,6 +72,14 @@ const updateSingleEvent = (event) => {
   refEventDialog.value?.hide();
   refCalendar.value.clearSelectedRange();
 };
+
+const loadEvents = (currentDate) => {
+  if (!currentDate) return;
+
+  appStore.loadEvents(currentDate);
+};
+
+loadEvents();
 </script>
 
 <template>
@@ -121,6 +129,7 @@ const updateSingleEvent = (event) => {
         ref="refCalendar"
         :modelValue="appStore.events"
         @update:singleEvent="updateSingleEvent"
+        @update:currentDate="loadEvents($event)"
         @action="handleAction"
       />
     </RPanel>

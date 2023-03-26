@@ -41,6 +41,14 @@ const fragments = computed(() => {
 });
 
 const formatDateTime = (d, f) => moment(d).format(f);
+
+const loadEvents = (currentDate) => {
+  if (!currentDate) return;
+
+  appStore.loadEvents(currentDate);
+};
+
+loadEvents(new Date());
 </script>
 
 <template>

@@ -19,7 +19,6 @@ const toggleSettingPanel = () => {
   isSettingPanelOpened.value = !isSettingPanelOpened.value;
 };
 
-appStore.loadEvents();
 watch(
   () => route.name,
   () => {
@@ -81,29 +80,13 @@ watch(
           </RTopBar>
 
           <div class="px-4">
-            <RInput label="Email" v-model="appStore.user.email" />
-            <RInput
-              label="Password"
-              type="password"
-              v-model="appStore.user.password"
-            />
-
-            <div class="flex justify-evenly">
-              <RButton
-                variant="primary"
-                class="w-24 justify-center"
-                v-if="appStore.isNotUpToDate"
-                @click="appStore.loadFromCloud"
-                >Load</RButton
-              >
-              <RButton
-                variant="primary"
-                class="w-24 justify-center"
-                @click="appStore.saveToCloud"
-                v-if="appStore.isChanged"
-                >Save</RButton
-              >
-            </div>
+            <!-- <RButton
+              variant="primary"
+              class="w-24 justify-center"
+              @click="appStore.convertOldData"
+            >
+              Convert
+            </RButton> -->
           </div>
         </div>
       </div>
@@ -115,7 +98,7 @@ watch(
   </div>
 
   <div v-else class="flex items-center justify-center h-[100vh]">
-    <RPanel>
+    <RPanel class="max-w-sm w-full">
       <RHeading type="h2">Sign In</RHeading>
       <SignInForm />
     </RPanel>

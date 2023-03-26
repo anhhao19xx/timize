@@ -5,6 +5,8 @@ import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import { API_EMAIL, API_PASSWORD, API_TOKEN } from '../constants';
 import { useNoticeStore } from './notice';
+import { Secure } from '@rugo-vn/shared';
+import moment from 'moment';
 
 const validateStatus = (status) => status >= 200 && status < 500;
 
@@ -97,16 +99,19 @@ export const useAppStore = defineStore('app', () => {
     user: tzEvent.user,
     from: tzEvent.from,
     to: tzEvent.to,
-    data: encrypt({
-      title: tzEvent.title,
-      color: tzEvent.color,
-      note: tzEvent.note,
-      done: tzEvent.done,
-    }),
+    data: {
+      cipher: encrypt({
+        title: tzEvent.title,
+        color: tzEvent.color,
+        note: tzEvent.note,
+        done: tzEvent.done,
+      }),
+      key: tzEvent.key,
+    },
   });
 
   const deserialize = (rawTzEvent) => {
-    const data = decrypt(rawTzEvent.data);
+    const data = decrypt(rawTzEvent.data.cipher);
     return {
       id: rawTzEvent.id,
       from: rawTzEvent.from,
@@ -125,6 +130,7 @@ export const useAppStore = defineStore('app', () => {
     const item = serialize({
       ...tzEvent,
       user: userInfo.id,
+      key: userInfo.credentials[0].key,
     });
 
     let res;
@@ -134,11 +140,11 @@ export const useAppStore = defineStore('app', () => {
         data: tzEvent,
       };
 
-      res = await http.post(`/api/tables/tzevents`, item);
+      res = await http.post(`/api/tables/notes`, item);
     } else if (isDelete) {
-      res = await http.delete(`/api/tables/tzevents/${tzEvent.id}`);
+      res = await http.delete(`/api/tables/notes/${tzEvent.id}`);
     } else {
-      res = await http.patch(`/api/tables/tzevents/${tzEvent.id}`, {
+      res = await http.patch(`/api/tables/notes/${tzEvent.id}`, {
         set: item,
       });
     }
@@ -236,12 +242,17 @@ export const useAppStore = defineStore('app', () => {
     notice.push('success', `Sign in successful`, '');
   };
 
-  const loadEvents = async () => {
+  const loadEvents = async (currentDate) => {
     const http = createHttp();
     const userInfo = await getUserInfo();
 
+    const fromRange = moment(currentDate).add(-31, 'days').toDate();
+    const toRange = moment(currentDate).add(31, 'days').toDate();
+
     const res = await http.get(
-      `/api/tables/tzevents?filters[user]=${userInfo.id}&limit=-1`
+      `/api/tables/notes?filters[user]=${
+        userInfo.id
+      }&filters[from][$gte]=${fromRange.toISOString()}&filters[from][$lte]=${toRange.toISOString()}&limit=-1`
     );
 
     const { data } = handleResponse(res);
@@ -249,6 +260,41 @@ export const useAppStore = defineStore('app', () => {
 
     while (events.length) events.shift();
     for (const tzEvent of nextEvents) events.push(tzEvent);
+  };
+
+  const createContent = async (name) => {
+    const http = createHttp();
+    const userInfo = await getUserInfo();
+
+    await http.post(`/api/tables/contents`, {
+      name,
+      user: userInfo.id,
+    });
+
+    notice.push('success', `Create successful`, '');
+  };
+
+  const loadContents = async () => {
+    const http = createHttp();
+    const userInfo = await getUserInfo();
+
+    const res = await http.get(
+      `/api/tables/contents?filters[user]=${userInfo.id}&limit=-1`
+    );
+
+    const { data } = handleResponse(res);
+
+    return data.sort((a, b) => a.name.localeCompare(b.name));
+  };
+
+  const updateContent = async (id, set) => {
+    const http = createHttp();
+
+    await http.patch(`/api/tables/contents/${id}`, {
+      set,
+    });
+
+    notice.push('success', `Update successful`, '');
   };
 
   return {
@@ -262,5 +308,8 @@ export const useAppStore = defineStore('app', () => {
     deleteEvent,
     login,
     loadEvents,
+    createContent,
+    loadContents,
+    updateContent,
   };
 });
