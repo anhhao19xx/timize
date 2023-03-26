@@ -13,9 +13,10 @@ import CheckboxIcon from '@rugo-vn/vue/dist/ionicons/CheckboxIcon.vue';
 import colors from 'tailwindcss/colors';
 import moment from 'moment';
 import { DatePicker } from 'v-calendar';
+import { formatDate } from '../utils';
 
 // input/output
-const props = defineProps(['modelValue', 'from', 'to']);
+const props = defineProps(['modelValue', 'from', 'to', 'maxColumns']);
 const emit = defineEmits([
   'action',
   'update:modelValue',
@@ -55,6 +56,7 @@ const events = reactive([]);
 const currentDate = ref(new Date(props.from || new Date()));
 const fromDate = ref(null);
 const toDate = ref(null);
+const tableColumnNo = ref(7);
 
 const cursorMenuStyle = reactive({});
 const menuEvent = ref(null);
@@ -72,11 +74,24 @@ let isResize = false;
 
 // methods
 const updateDateRange = () => {
-  fromDate.value = moment(currentDate.value).startOf('week').toDate();
-  toDate.value = moment(currentDate.value)
-    .startOf('week')
-    .add(7, 'days')
-    .toDate();
+  if (tableColumnNo.value === 7) {
+    fromDate.value = moment(currentDate.value).startOf('week').toDate();
+    toDate.value = moment(currentDate.value)
+      .startOf('week')
+      .add(tableColumnNo.value, 'days')
+      .toDate();
+  } else {
+    const mid = Math.floor(tableColumnNo.value / 2);
+
+    fromDate.value = moment(currentDate.value)
+      .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+      .add(-mid, 'days')
+      .toDate();
+
+    toDate.value = moment(fromDate.value)
+      .add(tableColumnNo.value, 'days')
+      .toDate();
+  }
 
   emit('update:currentDate', currentDate.value);
 };
@@ -93,15 +108,11 @@ const syncValue = () => {
   }
 };
 
-const formatDate = (date, format) => {
-  return moment(date).format(format);
-};
-
 const formatTime = (hour) => `${hour}:00`;
 
 const shiftWeek = (dir) => {
   currentDate.value = moment(currentDate.value)
-    .add(dir * 7, 'days')
+    .add(dir * tableColumnNo.value, 'days')
     .toDate();
 };
 
@@ -440,6 +451,14 @@ const callAction = (name) => {
   }
 };
 
+const windowResize = () => {
+  tableColumnNo.value = Math.min(
+    Math.floor((window.innerWidth - 150) / 200 + 1),
+    props.maxColumns || 7
+  );
+  updateDateRange();
+};
+
 const preventDefault = (e) => {
   e.preventDefault();
 };
@@ -511,6 +530,7 @@ onMounted(() => {
   window.addEventListener('contextmenu', preventDefault);
   window.addEventListener('mouseup', endDrag);
   window.addEventListener('mousemove', onDrag);
+  window.addEventListener('resize', windowResize);
   syncTime();
 });
 
@@ -519,9 +539,11 @@ onUnmounted(() => {
   window.removeEventListener('contextmenu', preventDefault);
   window.removeEventListener('mouseup', endDrag);
   window.removeEventListener('mousemove', onDrag);
+  window.removeEventListener('resize', windowResize);
 });
 
 watch(() => props.modelValue, syncValue, { deep: true });
+watch(() => props.maxColumns, windowResize);
 
 // exposes
 defineExpose({
@@ -529,7 +551,7 @@ defineExpose({
 });
 
 // handle
-updateDateRange();
+windowResize();
 syncValue();
 </script>
 

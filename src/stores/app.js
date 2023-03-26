@@ -171,7 +171,7 @@ export const useAppStore = defineStore('app', () => {
     );
   };
 
-  const updateEvent = (payload) => {
+  const updateEvent = async (payload) => {
     let isChanged = false;
     let updatedTzEvent = null;
 
@@ -192,7 +192,7 @@ export const useAppStore = defineStore('app', () => {
 
     if (!isChanged) return false;
 
-    save(updatedTzEvent);
+    await save(updatedTzEvent);
 
     notice.push(
       'success',
@@ -203,11 +203,11 @@ export const useAppStore = defineStore('app', () => {
     return true;
   };
 
-  const forceUpdateEvent = (id, payload) => {
+  const forceUpdateEvent = async (id, payload) => {
     const updatedTzEvent = clone(payload);
     updatedTzEvent.id = id;
 
-    save(updatedTzEvent);
+    await save(updatedTzEvent);
 
     notice.push(
       'success',
@@ -218,7 +218,7 @@ export const useAppStore = defineStore('app', () => {
     return true;
   };
 
-  const deleteEvent = (payload) => {
+  const deleteEvent = async (payload) => {
     let deletedTzEvent;
 
     for (let i = 0; i < events.length; i++) {
@@ -228,7 +228,7 @@ export const useAppStore = defineStore('app', () => {
       }
     }
 
-    save(deletedTzEvent, true);
+    await save(deletedTzEvent, true);
 
     notice.push(
       'success',
@@ -261,8 +261,8 @@ export const useAppStore = defineStore('app', () => {
     const http = createHttp();
     const userInfo = await getUserInfo();
 
-    const fromRange = moment(currentDate).add(-31, 'days').toDate();
-    const toRange = moment(currentDate).add(31, 'days').toDate();
+    const fromRange = moment(currentDate).add(-32, 'day').toDate();
+    const toRange = moment(currentDate).add(32, 'day').toDate();
 
     const res = await http.get(
       `/api/tables/notes?filters[user]=${

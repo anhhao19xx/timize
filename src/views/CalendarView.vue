@@ -2,13 +2,17 @@
 import { ref } from 'vue';
 
 import RCalendar from '../components/RCalendar.vue';
+import MonthCalendar from '../components/MonthCalendar.vue';
 
 import { useAppStore } from '../stores/app';
 import { RDialogActions } from '../constants';
+
 import EventEditor from '../components/EventEditor.vue';
+import RTab from '../components/RTab.vue';
 
 const refEventDialog = ref(null);
 const refCalendar = ref(null);
+const currentTab = ref('Month');
 
 const currentEvent = ref(null);
 const appStore = useAppStore();
@@ -91,52 +95,27 @@ const loadEvents = (currentDate) => {
           }
         "
       />
-      <!-- <RDialog ref="refEventDialog" :label="false">
-        <RHeading type="h3">{{
-          mode === RDialogActions.CREATE
-            ? 'Create a new event'
-            : `Edit "${currentEvent.title}" event`
-        }}</RHeading>
 
-        <EventForm
-          v-model="currentEvent"
-          @submit="
-            mode === RDialogActions.CREATE
-              ? addEvent()
-              : updateSingleEvent(currentEvent)
-          "
-        />
-
-        <div class="flex justify-between">
-          <RButton
-            variant="primary"
-            @click="
-              mode === RDialogActions.CREATE
-                ? addEvent()
-                : updateSingleEvent(currentEvent)
-            "
-            >Save</RButton
-          >
-
-          <RCheckbox
-            variant="primary"
-            :modelValue="currentEvent['done']"
-            @update:modelValue="
-              currentEvent['done'] = $event;
-              mode === RDialogActions.CREATE
-                ? null
-                : updateSingleEvent(currentEvent);
-            "
-          />
-        </div>
-      </RDialog> -->
+      <RTab
+        class="mb-4"
+        :tabs="['Day', 'Week', 'Month', 'Quater', 'Year']"
+        v-model="currentTab"
+      />
 
       <RCalendar
+        v-if="currentTab === 'Day' || currentTab === 'Week'"
         ref="refCalendar"
         :modelValue="appStore.events"
+        :maxColumns="currentTab === 'Day' ? 1 : 7"
         @update:singleEvent="updateSingleEvent"
         @update:currentDate="loadEvents($event)"
         @action="handleAction"
+      />
+
+      <MonthCalendar
+        v-else-if="currentTab === 'Month'"
+        :modelValue="appStore.events"
+        @update:currentDate="loadEvents($event)"
       />
     </RPanel>
   </div>
