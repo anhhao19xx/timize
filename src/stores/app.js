@@ -99,6 +99,7 @@ export const useAppStore = defineStore('app', () => {
     user: tzEvent.user,
     from: tzEvent.from,
     to: tzEvent.to,
+    content: tzEvent.content || undefined,
     data: {
       cipher: encrypt({
         title: tzEvent.title,
@@ -120,6 +121,7 @@ export const useAppStore = defineStore('app', () => {
       note: data.note,
       color: data.color,
       done: data.done,
+      content: rawTzEvent.content,
     };
   };
 
@@ -277,6 +279,18 @@ export const useAppStore = defineStore('app', () => {
     for (const tzEvent of nextEvents) events.push(tzEvent);
   };
 
+  const loadEventsByContent = async (id) => {
+    const http = createHttp();
+    const userInfo = await getUserInfo();
+
+    const res = await http.get(
+      `/api/tables/notes?filters[user]=${userInfo.id}&filters[content]=${id}&limit=-1`
+    );
+
+    const { data } = handleResponse(res);
+    return data.map(deserialize);
+  };
+
   const getEvent = async (id) => {
     const http = createHttp();
     const userInfo = await getUserInfo();
@@ -314,6 +328,17 @@ export const useAppStore = defineStore('app', () => {
     return data.sort((a, b) => a.name.localeCompare(b.name));
   };
 
+  const getContent = async (id) => {
+    const http = createHttp();
+    const userInfo = await getUserInfo();
+
+    const res = await http.get(
+      `/api/tables/contents/${id}?filters[user]=${userInfo.id}`
+    );
+
+    return handleResponse(res);
+  };
+
   const updateContent = async (id, set) => {
     const http = createHttp();
 
@@ -322,6 +347,19 @@ export const useAppStore = defineStore('app', () => {
     });
 
     notice.push('success', `Update successful`, '');
+  };
+
+  const searchContent = async (text) => {
+    const http = createHttp();
+    const userInfo = await getUserInfo();
+
+    const res = await http.get(
+      `/api/tables/contents?filters[user]=${userInfo.id}&filters[name][$regex]=.*${text}.*&filters[name][$options]=i&limit=5`
+    );
+
+    const { data } = handleResponse(res);
+
+    return data.sort((a, b) => a.name.localeCompare(b.name));
   };
 
   return {
@@ -336,9 +374,12 @@ export const useAppStore = defineStore('app', () => {
     deleteEvent,
     login,
     loadEvents,
+    loadEventsByContent,
     getEvent,
     createContent,
     loadContents,
     updateContent,
+    searchContent,
+    getContent,
   };
 });

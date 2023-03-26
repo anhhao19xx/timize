@@ -11,20 +11,15 @@ import MoveIcon from '@rugo-vn/vue/dist/ionicons/MoveIcon.vue';
 
 import { ref } from 'vue';
 import { useAppStore } from '../stores/app';
+import PencilIcon from '@rugo-vn/vue/dist/ionicons/PencilIcon.vue';
+import EventEditor from '../components/EventEditor.vue';
 
-// const nodes = ref({});
 const appStore = useAppStore();
 const contents = ref([]);
 const currentContent = ref(null);
-
-// const configs = ref({
-//   roots: [],
-//   keyboardNavigation: true,
-//   dragAndDrop: true,
-//   checkboxes: false,
-//   editable: true,
-//   disabled: false,
-// });
+const displayContent = ref(null);
+const tzEvents = ref([]);
+const currentEventId = ref(null);
 
 const addContent = async () => {
   const name = prompt('Enter your content name: ');
@@ -33,53 +28,7 @@ const addContent = async () => {
 
   await appStore.createContent(name);
   await loadContents();
-  // const item = {
-  //   id: uniqid(),
-  //   text: 'New content',
-  //   children: [],
-  // };
-  // nodes.value[item.id] = item;
-  // configs.value.roots.unshift(item.id);
 };
-
-// const removeContent = (id) => {
-//   for (const nodeId in nodes.value) {
-//     const currentNode = nodes.value[nodeId];
-//     currentNode.children = (currentNode.children || []).filter(
-//       (nid) => nid !== id
-//     );
-//   }
-
-//   delete nodes.value[id];
-//   configs.value.roots = configs.value.roots.filter((nid) => nid !== id);
-// };
-
-// const createDelayCall = () => {
-//   let timeout;
-//   let lastArgs;
-
-//   return (fn, now = false, ...args) => {
-//     if (now && timeout) {
-//       fn(...(args.length ? args : lastArgs));
-//       clearTimeout(timeout);
-//       return;
-//     }
-
-//     clearTimeout(timeout);
-//     lastArgs = args;
-
-//     timeout = setTimeout(() => {
-//       clearTimeout(timeout);
-//       fn(...args);
-//     }, 500);
-//   };
-// };
-
-// const delayCall = createDelayCall();
-
-// const handleChange = () => {
-//   console.log(`Contents changed`);
-// };
 
 const loadContents = async () => {
   contents.value = await appStore.loadContents();
@@ -105,6 +54,15 @@ const handleContent = (cnt, handleFn, clickFn) => {
   handleFn(cnt);
 };
 
+const loadNotes = async () => {
+  tzEvents.value = await appStore.loadEventsByContent(displayContent.value.id);
+};
+
+const showNotes = (cnt) => {
+  displayContent.value = cnt;
+  loadNotes();
+};
+
 loadContents();
 
 // watch(
@@ -115,12 +73,23 @@ loadContents();
 </script>
 
 <template>
-  <div class="flex px-4">
-    <RPanel class="w-1/2 max-w-md mt-6 relative">
+  <EventEditor
+    v-if="currentEventId"
+    :id="currentEventId"
+    @close="
+      {
+        currentEventId = null;
+        loadNotes();
+      }
+    "
+  />
+
+  <div class="flex px-4 items-start">
+    <RPanel class="w-1/2 lg:w-1/3 xl:w-1/4 mt-4 sticky top-24">
       <RButton
         variant="primary"
         @click="addContent"
-        class="px-0 py-0 justify-center w-12 h-12 rounded-full absolute -top-6 -right-6"
+        class="px-0 py-0 justify-center w-8 h-8 rounded-full absolute -top-4 left-6"
       >
         <AddIcon class="text-3xl" />
       </RButton>
@@ -130,6 +99,7 @@ loadContents();
         :node="cnt"
         :key="cnt.id"
         :load="(node) => getContents(node)"
+        @clickNode="showNotes"
       >
         <template #ending="{ isShowed, toggleNode, node }">
           <RButton
@@ -222,6 +192,23 @@ loadContents();
           </RButton>
         </template>
       </Tree> -->
+    </RPanel>
+
+    <RPanel class="ml-4 w-1/2 lg:w-2/3 xl:w-3/4 mt-4 min-h-[100vh]">
+      <div
+        v-for="tzEvent of tzEvents"
+        :key="tzEvent.id"
+        class="mb-2 pb-2 border-b border-dashed relative"
+      >
+        <RButton
+          class="px-0 py-0 w-8 h-8 justify-center absolute top-2 right-2"
+          variant="primary"
+          @click="currentEventId = tzEvent.id"
+        >
+          <PencilIcon class="text-lg" />
+        </RButton>
+        <div class="note-content" v-html="tzEvent.note"></div>
+      </div>
     </RPanel>
   </div>
 </template>

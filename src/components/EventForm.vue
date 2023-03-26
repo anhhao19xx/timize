@@ -5,6 +5,7 @@ import { reactive, watch, defineProps, defineEmits } from 'vue';
 import RColorPicker from './RColorPicker.vue';
 import RichEditor from './RichEditor.vue';
 import RTag from './RTag.vue';
+import ContentLookup from './ContentLookup.vue';
 
 const props = defineProps(['modelValue']);
 const emit = defineEmits(['update:modelValue', 'submit']);
@@ -77,7 +78,7 @@ syncValue();
       <RTag />
     </div>
 
-    <div class="mb-6">
+    <div class="mb-4">
       <label class="text-xs block mb-2 text-gray-600">Note:</label>
       <RichEditor
         :modelValue="form['note']"
@@ -86,7 +87,10 @@ syncValue();
     </div>
 
     <div class="mb-6">
-      <RInput class="my-0" label="Dictionary"></RInput>
+      <ContentLookup
+        :modelValue="form['content']"
+        @update:modelValue="($event) => edit('content', $event)"
+      />
     </div>
   </div>
 </template>

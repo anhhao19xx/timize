@@ -100,49 +100,8 @@ loadEvents(new Date());
         >
           <PencilIcon class="text-lg" />
         </RButton>
-        <div class="content" v-html="fragment.event.note"></div>
+        <div class="note-content" v-html="fragment.event.note"></div>
       </RPanel>
     </div>
   </div>
 </template>
-
-<style lang="scss">
-.content {
-  font-family: PoppinsVN, sans-serif;
-  font-size: 0.825rem;
-
-  img {
-    max-width: 50%;
-    margin: 1em auto;
-    @apply border rounded-lg;
-  }
-
-  p {
-    margin: 1em 0;
-  }
-
-  :first-child {
-    margin-top: 0;
-  }
-
-  :last-child {
-    margin-bottom: 0;
-  }
-
-  h1 {
-    font-size: 2em;
-  }
-
-  h2 {
-    font-size: 1.5em;
-  }
-
-  code {
-    @apply bg-gray-100 py-1 px-2 rounded;
-  }
-
-  pre {
-    @apply bg-black text-white px-4 py-2 rounded-lg font-bold;
-  }
-}
-</style>

@@ -12,7 +12,7 @@ import RTab from '../components/RTab.vue';
 
 const refEventDialog = ref(null);
 const refCalendar = ref(null);
-const currentTab = ref('Month');
+const currentTab = ref('Week');
 
 const currentEvent = ref(null);
 const appStore = useAppStore();

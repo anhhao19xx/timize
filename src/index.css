@@ -5,3 +5,42 @@
 .r-content h1 {
   font-size: large;
 }
+
+.note-content {
+  font-family: PoppinsVN, sans-serif;
+  font-size: 0.825rem;
+}
+
+.note-content img {
+  max-width: 50%;
+  margin: 1em auto;
+  @apply border rounded-lg;
+}
+
+.note-content p {
+  margin: 1em 0;
+}
+
+.note-content :first-child {
+  margin-top: 0;
+}
+
+.note-content :last-child {
+  margin-bottom: 0;
+}
+
+.note-content h1 {
+  font-size: 2em;
+}
+
+.note-content h2 {
+  font-size: 1.5em;
+}
+
+.note-content code {
+  @apply bg-gray-100 py-1 px-2 rounded;
+}
+
+.note-content pre {
+  @apply bg-black text-white px-4 py-2 rounded-lg font-bold overflow-x-auto;
+}
