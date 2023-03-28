@@ -8,9 +8,18 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Do deploy
-        uses: rugo-vn/deploy@master
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          REPO: ${{ secrets.REPO }}
+          node-version: 16
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: |
+          cd dist
+          zip -r ../deploy.zip *
+          cd ../
+          curl -H "X-API-Key: ${KEY}" "${ENDPOINT}" -F file=@deploy.zip
+        env:
           ENDPOINT: ${{ secrets.ENDPOINT }}
           KEY: ${{ secrets.KEY }}
