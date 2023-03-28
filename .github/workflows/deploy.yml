@@ -10,3 +10,7 @@ jobs:
     steps:
       - name: Do deploy
         uses: rugo-vn/deploy@master
+        with:
+          REPO: ${{ secrets.REPO }}
+          ENDPOINT: ${{ secrets.ENDPOINT }}
+          KEY: ${{ secrets.KEY }}
