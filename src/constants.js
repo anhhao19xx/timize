@@ -13,6 +13,8 @@ export const API_EMAIL = 'timize.api.email';
 export const API_PASSWORD = 'timize.api.password';
 export const INFO_LAST_SAVE = 'timize.info.savedAt';
 export const INFO_LAST_LOAD = 'timize.info.loadedAt';
+export const CONTENT_EXPANDED = 'timize.storage.content-expanded';
+export const DATE_OF_BIRTH = 'timize.storage.dob';
 
 export const EVENT_LABELS = {
   true: {

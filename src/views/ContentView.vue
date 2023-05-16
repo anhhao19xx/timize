@@ -4,15 +4,17 @@
 // import TrashIcon from '@rugo-vn/vue/dist/ionicons/TrashIcon.vue';
 import CaretForwardIcon from '@rugo-vn/vue/dist/ionicons/CaretForwardIcon.vue';
 import AddIcon from '@rugo-vn/vue/dist/ionicons/AddIcon.vue';
-import EyeIcon from '@rugo-vn/vue/dist/ionicons/EyeIcon.vue';
-import EyeOffIcon from '@rugo-vn/vue/dist/ionicons/EyeOffIcon.vue';
+import DocumentIcon from '@rugo-vn/vue/dist/ionicons/DocumentIcon.vue';
 import CheckmarkIcon from '@rugo-vn/vue/dist/ionicons/CheckmarkIcon.vue';
 import MoveIcon from '@rugo-vn/vue/dist/ionicons/MoveIcon.vue';
+import ChevronForwardIcon from '@rugo-vn/vue/dist/ionicons/ChevronForwardIcon.vue';
+import ChevronDownIcon from '@rugo-vn/vue/dist/ionicons/ChevronDownIcon.vue';
 
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
 import { useAppStore } from '../stores/app';
 import PencilIcon from '@rugo-vn/vue/dist/ionicons/PencilIcon.vue';
 import EventEditor from '../components/EventEditor.vue';
+import { CONTENT_EXPANDED } from '../constants.js';
 
 const appStore = useAppStore();
 const contents = ref([]);
@@ -20,6 +22,7 @@ const currentContent = ref(null);
 const displayContent = ref(null);
 const tzEvents = ref([]);
 const currentEventId = ref(null);
+const expands = ref([]);
 
 const addContent = async () => {
   const name = prompt('Enter your content name: ');
@@ -31,7 +34,33 @@ const addContent = async () => {
 };
 
 const loadContents = async () => {
-  contents.value = await appStore.loadContents();
+  contents.value = [];
+
+  nextTick(async () => {
+    expands.value = [];
+
+    try {
+      expands.value = JSON.parse(localStorage.getItem(CONTENT_EXPANDED));
+    } catch (_) {
+      // pass
+    }
+
+    if (!Array.isArray(expands.value)) expands.value = [];
+
+    const cnts = await appStore.loadContents();
+    contents.value = [];
+
+    for (const parent of cnts) {
+      if (expands.value.indexOf(parent.id) !== -1) parent.expanded = true;
+
+      parent.children ||= [];
+      for (const child of cnts) {
+        if (child.parent === parent.id) parent.children.push(child);
+      }
+
+      if (!parent.parent) contents.value.push(parent);
+    }
+  });
 };
 
 const getContents = (node) => {
@@ -52,6 +81,20 @@ const moveCurrentContentTo = async (cnt) => {
 const handleContent = (cnt, handleFn, clickFn) => {
   clickFn();
   handleFn(cnt);
+};
+
+const expandNode = async (node, isShowed) => {
+  const p = expands.value.indexOf(node.id);
+
+  if (!isShowed && p !== -1) {
+    expands.value.splice(p, 1);
+  }
+
+  if (isShowed && p === -1) {
+    expands.value.push(node.id);
+  }
+
+  localStorage.setItem(CONTENT_EXPANDED, JSON.stringify(expands.value));
 };
 
 const loadNotes = async () => {
@@ -101,7 +144,25 @@ loadContents();
         :load="(node) => getContents(node)"
         @clickNode="showNotes"
       >
-        <template #ending="{ isShowed, toggleNode, node }">
+        <template #heading="{ isShowed, toggleNode, node }">
+          <button
+            @click="
+              toggleNode();
+              expandNode(node, !isShowed);
+            "
+            class="pl-[.15rem] hover:bg-gray-100"
+            v-if="node.children.length"
+          >
+            <ChevronForwardIcon v-if="!isShowed" />
+            <ChevronDownIcon v-else />
+          </button>
+
+          <div v-else class="pl-[.15rem]">
+            <DocumentIcon type="outline" />
+          </div>
+        </template>
+
+        <template #ending="{ node }">
           <RButton
             v-if="node === currentContent"
             variant="secondary"
@@ -118,15 +179,6 @@ loadContents();
             @click="moveCurrentContentTo(node)"
           >
             <CheckmarkIcon />
-          </RButton>
-
-          <RButton
-            :variant="isShowed ? 'secondary' : 'primary'"
-            class="px-0 py-0 w-6 h-6 rounded-md items-center justify-center ml-2"
-            @click="toggleNode()"
-          >
-            <EyeIcon v-if="!isShowed" />
-            <EyeOffIcon v-else />
           </RButton>
 
           <RDropdown :enableHover="true" boxAlign="right">
