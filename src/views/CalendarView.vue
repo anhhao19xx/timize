@@ -92,7 +92,7 @@ const loadEvents = (currentDate) => {
           {
             loadEvents(currentEvent.from);
             currentEvent = null;
-            refCalendar.clearSelectedRange();
+            refCalendar?.clearSelectedRange();
           }
         "
       />
@@ -121,6 +121,7 @@ const loadEvents = (currentDate) => {
 
       <YearCalendar
         v-else-if="currentTab === 'Year'"
+        ref="refCalendar"
         :modelValue="appStore.events"
         @action="handleAction"
         @update:currentDate="loadEvents($event)"

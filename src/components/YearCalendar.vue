@@ -3,14 +3,19 @@ import moment from 'moment';
 import colors from 'tailwindcss/colors';
 import { reactive, ref, watch } from 'vue';
 import { clone } from 'ramda';
-import { DATE_OF_BIRTH, MAX_YEAR } from '../constants.js';
+import { ALL_DAY, DATE_OF_BIRTH, MAX_DAY, MAX_YEAR } from '../constants.js';
+import { useAppStore } from '../stores/app';
+import { isOverlaped } from '../utils';
 
 const emit = defineEmits(['action']);
 
+const appStore = useAppStore();
 const data = ref([]);
 const dob = ref(localStorage.getItem(DATE_OF_BIRTH));
 const labels = reactive({});
 const selectRange = ref(null);
+const tzEvents = ref([]);
+const currentEvents = ref([]);
 
 async function autoSave() {
   if (!moment(dob.value).isValid()) return;
@@ -22,6 +27,8 @@ async function autoData() {
   const startDate = moment(dob.value).startOf('year');
 
   if (!moment(dob.value).isValid()) return;
+
+  tzEvents.value = await appStore.loadLongTermEvents(MAX_DAY * ALL_DAY);
 
   data.value = [];
 
@@ -42,12 +49,20 @@ async function autoData() {
     }
 
     const lastBatch = data.value[data.value.length - 1];
-
-    lastBatch.push({
+    const fragment = {
       from: moment(cursor).startOf('week').toDate(),
       to: moment(cursor).endOf('week').toDate(),
       color: cursor.isBefore(today) ? colors['gray']['300'] : false,
-    });
+      tzEvents: [],
+    };
+
+    for (const event of tzEvents.value)
+      if (isOverlaped(fragment.from, fragment.to, event.from, event.to)) {
+        fragment.color =
+          colors[event.color.split('-')[0]][event.color.split('-')[1] || '500'];
+        fragment.tzEvents.push(event);
+      }
+    lastBatch.push(fragment);
 
     cursor = cursor.add(1, 'week');
   }
@@ -58,6 +73,15 @@ async function onSelect(batches) {
     from: new Date(Math.min(...batches.map((item) => +new Date(item.from)))),
     to: new Date(Math.max(...batches.map((item) => +new Date(item.to)))),
   };
+
+  currentEvents.value = tzEvents.value.filter((tzEvent) =>
+    isOverlaped(
+      selectRange.value.from,
+      selectRange.value.to,
+      tzEvent.from,
+      tzEvent.to
+    )
+  );
 }
 
 async function createEvent() {
@@ -65,6 +89,15 @@ async function createEvent() {
 
   emit('action', 'create', clone(selectRange.value));
 }
+
+async function clearSelectedRange() {
+  autoData();
+}
+
+// exposes
+defineExpose({
+  clearSelectedRange,
+});
 
 watch(
   () => [dob.value],
@@ -95,9 +128,21 @@ autoData();
           :variant="selectRange ? 'primary' : 'secondary'"
           :disabled="!selectRange"
           @click="createEvent"
+          class="mb-4"
         >
           Create
         </RButton>
+
+        <hr />
+
+        <div
+          v-for="tzEvent in currentEvents"
+          :key="tzEvent.id"
+          class="px-2 py-1 hover:bg-gray-100"
+          @click="$emit('action', 'edit', clone(tzEvent))"
+        >
+          {{ tzEvent.title }}
+        </div>
       </div>
     </div>
   </div>

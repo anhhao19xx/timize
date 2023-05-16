@@ -99,6 +99,7 @@ export const useAppStore = defineStore('app', () => {
     user: tzEvent.user,
     from: tzEvent.from,
     to: tzEvent.to,
+    duration: moment(tzEvent.to).toDate() - moment(tzEvent.from).toDate(),
     content: tzEvent.content || undefined,
     data: {
       cipher: encrypt({
@@ -118,6 +119,9 @@ export const useAppStore = defineStore('app', () => {
       id: rawTzEvent.id,
       from: rawTzEvent.from,
       to: rawTzEvent.to,
+      duration:
+        rawTzEvent.duration ||
+        moment(rawTzEvent.to).toDate() - moment(rawTzEvent.from).toDate(),
       title: data.title,
       note: data.note,
       color: data.color,
@@ -302,6 +306,18 @@ export const useAppStore = defineStore('app', () => {
     return data.map(deserialize);
   };
 
+  const loadLongTermEvents = async (duration) => {
+    const http = createHttp();
+    const userInfo = await getUserInfo();
+
+    let res = await http.get(
+      `/api/tables/notes?filters[user]=${userInfo.id}&filters[duration][$gte]=${duration}&limit=-1`
+    );
+
+    let { data } = handleResponse(res);
+    return data.map(deserialize);
+  };
+
   const getEvent = async (id) => {
     const http = createHttp();
     const userInfo = await getUserInfo();
@@ -386,6 +402,7 @@ export const useAppStore = defineStore('app', () => {
     login,
     loadEvents,
     loadEventsByContent,
+    loadLongTermEvents,
     getEvent,
     createContent,
     loadContents,

@@ -13,7 +13,7 @@ import CheckboxIcon from '@rugo-vn/vue/dist/ionicons/CheckboxIcon.vue';
 import colors from 'tailwindcss/colors';
 import moment from 'moment';
 import { DatePicker } from 'v-calendar';
-import { formatDate } from '../utils.js';
+import { formatDate, isOverlaped } from '../utils.js';
 import { MAX_DAY } from '../constants.js';
 
 // input/output
@@ -136,20 +136,6 @@ const timePercent = (date) => {
   const minute = currentDate.get('minute');
 
   return `${((hour * MINUTES + minute) / (HOURS * MINUTES)) * 100}%`;
-};
-
-const isOverlaped = (from, to, nextFrom, nextTo) => {
-  const fromDate = moment(from);
-  const toDate = moment(to);
-  const nextFromDate = moment(nextFrom);
-  const nextToDate = moment(nextTo);
-  if (fromDate.isBefore(nextFromDate) && toDate.isSameOrBefore(nextFromDate))
-    return false;
-
-  if (fromDate.isSameOrAfter(nextToDate) && toDate.isSameOrAfter(nextToDate))
-    return false;
-
-  return true;
 };
 
 const getDayFragments = (date) => {
