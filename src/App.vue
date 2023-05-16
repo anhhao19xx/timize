@@ -6,6 +6,7 @@ import CloseIcon from '@rugo-vn/vue/dist/ionicons/CloseIcon.vue';
 import CalendarIcon from '@rugo-vn/vue/dist/ionicons/CalendarIcon.vue';
 import ChatboxIcon from '@rugo-vn/vue/dist/ionicons/ChatboxIcon.vue';
 import BookIcon from '@rugo-vn/vue/dist/ionicons/BookIcon.vue';
+import CheckboxIcon from '@rugo-vn/vue/dist/ionicons/CheckboxIcon.vue';
 
 import RTopBar from './components/RTopBar.vue';
 import SignInForm from './components/SignInForm.vue';
@@ -34,6 +35,15 @@ watch(
         <template #topbar>
           <div class="w-full ml-[-2.5rem] h-full flex items-center">
             <RouterLink to="/">
+              <RButton
+                :variant="route.name === 'todos' ? 'primary' : 'none'"
+                class="px-0 py-0 h-12 w-12 items-center flex flex-col justify-center rounded"
+              >
+                <CheckboxIcon class="text-xl" />
+              </RButton>
+            </RouterLink>
+
+            <RouterLink to="/calendar">
               <RButton
                 :variant="route.name === 'calendar' ? 'primary' : 'none'"
                 class="px-0 py-0 h-12 w-12 items-center flex flex-col justify-center rounded"

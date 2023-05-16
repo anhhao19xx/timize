@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "TIMIZE_API=https://timize.haova.me vite",
-    "build": "TIMIZE_API=https://timize.haova.me vite build",
+    "dev": "vite",
+    "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
@@ -17,7 +17,7 @@
   "devDependencies": {
     "@popperjs/core": "^2.11.7",
     "@rugo-vn/shared": "^1.0.0",
-    "@rugo-vn/vue": "^1.0.5",
+    "@rugo-vn/vue": "^1.0.8",
     "@rushstack/eslint-patch": "^1.1.4",
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/eslint-config-prettier": "^7.0.0",
@@ -28,6 +28,7 @@
     "crypto-js": "^4.1.1",
     "eslint": "^8.22.0",
     "eslint-plugin-vue": "^9.3.0",
+    "humanize-duration": "^3.28.0",
     "moment": "^2.29.4",
     "postcss": "^8.4.21",
     "prettier": "^2.7.1",

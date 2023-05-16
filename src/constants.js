@@ -13,3 +13,14 @@ export const API_EMAIL = 'timize.api.email';
 export const API_PASSWORD = 'timize.api.password';
 export const INFO_LAST_SAVE = 'timize.info.savedAt';
 export const INFO_LAST_LOAD = 'timize.info.loadedAt';
+
+export const EVENT_LABELS = {
+  true: {
+    true: 'Critical',
+    false: 'Pressing',
+  },
+  false: {
+    true: 'Crucial',
+    false: 'Trivial',
+  },
+};

@@ -4,7 +4,6 @@ import { reactive, watch, defineProps, defineEmits } from 'vue';
 
 import RColorPicker from './RColorPicker.vue';
 import RichEditor from './RichEditor.vue';
-import RTag from './RTag.vue';
 import ContentLookup from './ContentLookup.vue';
 
 const props = defineProps(['modelValue']);
@@ -74,8 +73,12 @@ syncValue();
       />
     </div>
 
-    <div>
-      <RTag />
+    <div class="mb-4">
+      <label class="text-xs block mb-2 text-gray-600">Important:</label>
+      <RCheckbox
+        :modelValue="form['important']"
+        @update:modelValue="edit('important', $event)"
+      />
     </div>
 
     <div class="mb-4">

@@ -106,6 +106,7 @@ export const useAppStore = defineStore('app', () => {
         color: tzEvent.color,
         note: tzEvent.note,
         done: tzEvent.done,
+        important: tzEvent.important,
       }),
       key: tzEvent.key,
     },
@@ -122,6 +123,7 @@ export const useAppStore = defineStore('app', () => {
       color: data.color,
       done: data.done,
       content: rawTzEvent.content,
+      important: data.important,
     };
   };
 
@@ -259,20 +261,29 @@ export const useAppStore = defineStore('app', () => {
     notice.push('success', `Sign in successful`, '');
   };
 
-  const loadEvents = async (currentDate) => {
+  const loadEvents = async (currentDate, isDone = null) => {
     const http = createHttp();
     const userInfo = await getUserInfo();
 
     const fromRange = moment(currentDate).add(-32, 'day').toDate();
     const toRange = moment(currentDate).add(32, 'day').toDate();
 
-    const res = await http.get(
+    let res = await http.get(
       `/api/tables/notes?filters[user]=${
         userInfo.id
       }&filters[from][$gte]=${fromRange.toISOString()}&filters[from][$lte]=${toRange.toISOString()}&limit=-1`
     );
 
-    const { data } = handleResponse(res);
+    let { data } = handleResponse(res);
+
+    if (typeof isDone === 'boolean') {
+      res = await http.get(
+        `/api/tables/notes?filters[user]=${userInfo.id}&filters[done]=${isDone}&limit=-1`
+      );
+
+      data = [...data, ...handleResponse(res).data];
+    }
+
     const nextEvents = data.map(deserialize);
 
     while (events.length) events.shift();
