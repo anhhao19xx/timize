@@ -114,8 +114,10 @@ emit('update:currentDate', currentDate.value);
 
       <div class="overflow-auto h-[calc(100%-27px)] px-1">
         <div
-          v-for="tzEvent in modelValue.filter((e) =>
-            moment(e.from).isSame(date, 'day')
+          v-for="tzEvent in modelValue.filter(
+            (e) =>
+              moment(date).isSameOrAfter(e.from, 'day') &&
+              moment(date).isSameOrBefore(e.to, 'day')
           )"
           :key="tzEvent.id"
           class="text-white px-2 py-1 mb-1 rounded"

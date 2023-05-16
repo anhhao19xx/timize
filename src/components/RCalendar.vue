@@ -13,7 +13,8 @@ import CheckboxIcon from '@rugo-vn/vue/dist/ionicons/CheckboxIcon.vue';
 import colors from 'tailwindcss/colors';
 import moment from 'moment';
 import { DatePicker } from 'v-calendar';
-import { formatDate } from '../utils';
+import { formatDate } from '../utils.js';
+import { MAX_DAY } from '../constants.js';
 
 // input/output
 const props = defineProps(['modelValue', 'from', 'to', 'maxColumns']);
@@ -150,6 +151,49 @@ const isOverlaped = (from, to, nextFrom, nextTo) => {
   return true;
 };
 
+const getDayFragments = (date) => {
+  if (!date) return [];
+
+  const startDate = moment(date);
+  startDate.set(MID_NIGHT);
+  const endDate = moment(date);
+  endDate.set(MID_NIGHT);
+  endDate.add(1, 'day');
+
+  const fragments = [];
+
+  for (const event of events) {
+    const fromDate = moment(event.from);
+    const toDate = moment(event.to);
+
+    const duration = toDate.diff(fromDate, 'hours');
+
+    if (duration < MAX_DAY * 24) {
+      continue;
+    }
+
+    if (!isOverlaped(startDate, endDate, fromDate, toDate)) continue;
+
+    const fragment = {
+      event,
+      id: ++currentFragmentId,
+      style: {
+        backgroundColor: event.done
+          ? colors['gray']['500']
+          : colors[event.color.split('-')[0]][
+              event.color.split('-')[1] || '500'
+            ],
+        opacity: event === placeholderEvent ? 0.3 : 1,
+      },
+      isPlaced: false,
+    };
+
+    fragments.push(fragment);
+  }
+
+  return fragments;
+};
+
 const getFragments = (date) => {
   if (!date) return [];
 
@@ -165,9 +209,15 @@ const getFragments = (date) => {
     const fromDate = moment(event.from);
     const toDate = moment(event.to);
 
+    const duration = toDate.diff(fromDate, 'hours');
+
+    if (duration > MAX_DAY * 24) {
+      continue;
+    }
+
     if (!isOverlaped(startDate, endDate, fromDate, toDate)) continue;
 
-    fragments.push({
+    const fragment = {
       event,
       id: ++currentFragmentId,
       from: fromDate.isBefore(startDate)
@@ -183,7 +233,9 @@ const getFragments = (date) => {
         opacity: event === placeholderEvent ? 0.3 : 1,
       },
       isPlaced: false,
-    });
+    };
+
+    fragments.push(fragment);
   }
 
   if (fragments.length === 0) return [];
@@ -559,40 +611,26 @@ syncValue();
   <div class="select-none">
     <div class="flex">
       <!-- time label -->
-      <div class="w-16 border-r border-l border-b">
-        <!-- time label -->
-        <div class="w-16 border-t h-24 p-3.5 z-20 relative">
-          <DatePicker
-            v-model="currentDate"
-            @update:modelValue="updateDateRange"
-            :attributes="datePickerAttrs"
-          >
-            <template v-slot="{ togglePopover }">
-              <RButton
-                class="px-2 py-2 rounded"
-                variant="primary"
-                @click="togglePopover()"
-              >
-                <CalendarIcon class="text-lg" />
-              </RButton>
-            </template>
-          </DatePicker>
-        </div>
-        <!-- end time label -->
-
-        <div
-          class="h-12 border-t border-[transparent]"
-          v-for="hour in hours"
-          :key="`label-${hour}`"
+      <div class="w-16 border-t border-l border-r p-3.5 z-20 relative">
+        <DatePicker
+          v-model="currentDate"
+          @update:modelValue="updateDateRange"
+          :attributes="datePickerAttrs"
         >
-          <div class="text-center mt-[-.5rem]">
-            {{ formatTime(hour) }}
-          </div>
-        </div>
+          <template v-slot="{ togglePopover }">
+            <RButton
+              class="px-2 py-2 rounded"
+              variant="primary"
+              @click="togglePopover()"
+            >
+              <CalendarIcon class="text-lg" />
+            </RButton>
+          </template>
+        </DatePicker>
       </div>
       <!-- end time label -->
 
-      <div class="flex-1">
+      <div class="w-full">
         <div class="flex w-full relative">
           <!-- month header -->
           <div
@@ -629,7 +667,7 @@ syncValue();
         <div class="flex w-full">
           <!-- date header -->
           <div
-            class="flex-1 border-r border-t text-center h-16 flex flex-col items-center"
+            class="flex-1 border-r border-t text-center flex flex-col items-center"
             v-for="date in dates"
             :key="`header-${date}`"
           >
@@ -645,10 +683,41 @@ syncValue();
             >
               {{ formatDate(date, 'DD') }}
             </div>
+
+            <div class="relative w-full">
+              <!-- fragments -->
+              <div
+                class="text-white px-1 py-0.5 rounded border-l border-b w-full"
+                v-for="fragment in getDayFragments(date)"
+                :key="`fragment-${fragment.id}`"
+                :style="fragment.style"
+                @mousedown="$emit('action', 'edit', clone(fragment.event))"
+              >
+                {{ fragment.event.title }}
+              </div>
+              <!-- end fragments -->
+            </div>
           </div>
           <!-- end date header -->
         </div>
+      </div>
+    </div>
+    <div class="flex">
+      <!-- time label -->
+      <div class="w-16 border-r border-l border-b">
+        <div
+          class="h-12 border-t border-[transparent]"
+          v-for="hour in hours"
+          :key="`label-${hour}`"
+        >
+          <div class="text-center mt-[-.5rem]">
+            {{ formatTime(hour) }}
+          </div>
+        </div>
+      </div>
+      <!-- end time label -->
 
+      <div class="flex-1">
         <div ref="refTimeSheet" class="flex w-full">
           <div
             class="date-time-sheet flex-1 border-r border-b relative"

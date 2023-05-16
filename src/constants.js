@@ -16,6 +16,10 @@ export const INFO_LAST_LOAD = 'timize.info.loadedAt';
 export const CONTENT_EXPANDED = 'timize.storage.content-expanded';
 export const DATE_OF_BIRTH = 'timize.storage.dob';
 
+export const MAX_YEAR = 60;
+export const ALL_DAY = 1000 * 60 * 60 * 24;
+export const MAX_DAY = 1;
+
 export const EVENT_LABELS = {
   true: {
     true: 'Critical',

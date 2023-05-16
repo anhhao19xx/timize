@@ -9,10 +9,11 @@ import { RDialogActions } from '../constants';
 
 import EventEditor from '../components/EventEditor.vue';
 import RTab from '../components/RTab.vue';
+import YearCalendar from '../components/YearCalendar.vue';
 
 const refEventDialog = ref(null);
 const refCalendar = ref(null);
-const currentTab = ref('Week');
+const currentTab = ref('Year');
 
 const currentEvent = ref(null);
 const appStore = useAppStore();
@@ -115,6 +116,13 @@ const loadEvents = (currentDate) => {
       <MonthCalendar
         v-else-if="currentTab === 'Month'"
         :modelValue="appStore.events"
+        @update:currentDate="loadEvents($event)"
+      />
+
+      <YearCalendar
+        v-else-if="currentTab === 'Year'"
+        :modelValue="appStore.events"
+        @action="handleAction"
         @update:currentDate="loadEvents($event)"
       />
     </RPanel>
