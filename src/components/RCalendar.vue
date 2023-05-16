@@ -61,6 +61,7 @@ const tableColumnNo = ref(7);
 
 const cursorMenuStyle = reactive({});
 const menuEvent = ref(null);
+const cursorMouse = ref(null);
 
 let loop = null;
 let currentFragmentId = 1;
@@ -332,7 +333,7 @@ const pointToDate = (e) => {
   const date =
     dates.value[
       Math.floor(
-        (e.pageX - refTimeSheet.value.offsetLeft) /
+        Math.max(e.pageX - refTimeSheet.value.offsetLeft, 0) /
           (refTimeSheet.value.offsetWidth / dates.value.length)
       )
     ];
@@ -341,7 +342,7 @@ const pointToDate = (e) => {
   startDate.set(MID_NIGHT);
 
   const hour = floorValue(
-    (e.pageY - refTimeSheet.value.offsetTop) /
+    Math.max(e.pageY - refTimeSheet.value.offsetTop, 0) /
       (refTimeSheet.value.offsetHeight / HOURS),
     ROUNDED_HOUR
   );
@@ -433,6 +434,10 @@ const endDrag = (e) => {
 };
 
 const onDrag = (e) => {
+  // cursor mouse
+  cursorMouse.value.style.top = `${e.pageY - refTimeSheet.value.offsetTop}px`;
+  // cursorMouse.value.style.left = `${e.pageX}px`;
+
   if (!isDrag) return;
 
   if (selectedEvent) {
@@ -608,7 +613,7 @@ syncValue();
 </script>
 
 <template>
-  <div class="select-none">
+  <div class="select-none overflow-hidden">
     <div class="flex">
       <!-- time label -->
       <div class="w-16 border-t border-l border-r p-3.5 z-20 relative">
@@ -702,66 +707,74 @@ syncValue();
         </div>
       </div>
     </div>
-    <div class="flex">
-      <!-- time label -->
-      <div class="w-16 border-r border-l border-b">
-        <div
-          class="h-12 border-t border-[transparent]"
-          v-for="hour in hours"
-          :key="`label-${hour}`"
-        >
-          <div class="text-center mt-[-.5rem]">
-            {{ formatTime(hour) }}
-          </div>
-        </div>
-      </div>
-      <!-- end time label -->
 
-      <div class="flex-1">
-        <div ref="refTimeSheet" class="flex w-full">
+    <div ref="refTimeSheet">
+      <div class="flex relative">
+        <!-- time label -->
+        <div class="w-16 border-r border-l border-b relative">
           <div
-            class="date-time-sheet flex-1 border-r border-b relative"
-            v-for="date in dates"
-            :key="`body-${date}`"
-            @mousedown="startDrag($event, date)"
+            class="h-12 border-t border-[transparent]"
+            v-for="hour in hours"
+            :key="`label-${hour}`"
           >
-            <!-- time sheet -->
-            <div
-              class="h-12 border-t"
-              v-for="hour in hours"
-              :key="`body-${date}-${hour}`"
-            ></div>
-            <!-- end time sheet -->
-
-            <!-- time cursor -->
-            <div
-              v-if="isSameDate(date, now)"
-              class="absolute w-full border-b-2 border-red-500 before:block before:rounded-full before:w-3 before:h-3 before:bg-red-500 before:absolute before:top-[-.375em] before:left-[-.375rem] z-10"
-              :style="timeCursorStyle"
-            ></div>
-            <!-- end time cursor -->
-
-            <!-- fragments -->
-            <div
-              :class="`absolute text-white px-1 py-0.5 rounded border-l border-b ${
-                fragment.event === menuEvent
-                  ? 'outline outline-2 outline-primary-500'
-                  : ''
-              }`"
-              v-for="fragment in getFragments(date)"
-              :key="`fragment-${fragment.id}`"
-              :style="fragment.style"
-              @mousedown="selectEvent($event, fragment.event)"
-            >
-              {{ fragment.event.title }}
-              <button
-                class="absolute bottom-0 bg-black w-full left-0 h-1 cursor-ns-resize opacity-10 rounded"
-                @mousedown="markAsResize"
-              ></button>
+            <div class="text-center mt-[-.5rem]">
+              {{ formatTime(hour) }}
             </div>
-            <!-- end fragments -->
           </div>
         </div>
+        <!-- end time label -->
+
+        <div class="flex-1">
+          <div class="flex w-full">
+            <div
+              class="date-time-sheet flex-1 border-r border-b relative"
+              v-for="date in dates"
+              :key="`body-${date}`"
+              @mousedown="startDrag($event, date)"
+            >
+              <!-- time sheet -->
+              <div
+                class="h-12 border-t"
+                v-for="hour in hours"
+                :key="`body-${date}-${hour}`"
+              ></div>
+              <!-- end time sheet -->
+
+              <!-- time cursor -->
+              <div
+                v-if="isSameDate(date, now)"
+                class="absolute w-full border-b-2 border-red-500 before:block before:rounded-full before:w-3 before:h-3 before:bg-red-500 before:absolute before:top-[-.375em] before:left-[-.375rem] z-10"
+                :style="timeCursorStyle"
+              ></div>
+              <!-- end time cursor -->
+
+              <!-- fragments -->
+              <div
+                :class="`absolute text-white px-1 py-0.5 rounded border-l border-b ${
+                  fragment.event === menuEvent
+                    ? 'outline outline-2 outline-primary-500'
+                    : ''
+                }`"
+                v-for="fragment in getFragments(date)"
+                :key="`fragment-${fragment.id}`"
+                :style="fragment.style"
+                @mousedown="selectEvent($event, fragment.event)"
+              >
+                {{ fragment.event.title }}
+                <button
+                  class="absolute bottom-0 bg-black w-full left-0 h-1 cursor-ns-resize opacity-10 rounded"
+                  @mousedown="markAsResize"
+                ></button>
+              </div>
+              <!-- end fragments -->
+            </div>
+          </div>
+        </div>
+
+        <div
+          ref="cursorMouse"
+          class="absolute w-full h-[2px] bg-primary-600 pointer-events-none opacity-20"
+        ></div>
       </div>
     </div>
 

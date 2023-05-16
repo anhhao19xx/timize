@@ -13,7 +13,7 @@ import YearCalendar from '../components/YearCalendar.vue';
 
 const refEventDialog = ref(null);
 const refCalendar = ref(null);
-const currentTab = ref('Year');
+const currentTab = ref('Week');
 
 const currentEvent = ref(null);
 const appStore = useAppStore();
